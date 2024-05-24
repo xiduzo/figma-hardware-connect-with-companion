@@ -1,10 +1,14 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
+import {
+  httpBatchLink,
+  loggerLink,
+  unstable_httpBatchStreamLink,
+} from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
-import { useState } from "react";
+import React, { useState } from "react";
 import SuperJSON from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
@@ -37,7 +41,10 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export function TRPCReactProvider(props: { children: React.ReactNode }) {
+export function TRPCReactProvider(props: {
+  children: React.ReactNode;
+  source: string;
+}) {
   const queryClient = getQueryClient();
 
   const [trpcClient] = useState(() =>
@@ -48,17 +55,28 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        unstable_httpBatchStreamLink({
+        httpBatchLink({
           transformer: SuperJSON,
           url: getBaseUrl() + "/api/trpc",
           headers: () => {
             const headers = new Headers();
-            headers.set("x-trpc-source", "nextjs-react");
+            headers.set("x-trpc-source", props.source);
+            headers.set("Content-Type", "application/json");
             return headers;
+          },
+          fetch: (url, options) => {
+            return fetch(url, {
+              ...options,
+              credentials: "same-origin",
+              headers: {
+                "content-type": "whatt",
+                "x-trpc-source": props.source,
+              },
+            });
           },
         }),
       ],
-    })
+    }),
   );
 
   return (
@@ -71,7 +89,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
 }
 
 function getBaseUrl() {
-  if (typeof window !== "undefined") return window.location.origin;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }

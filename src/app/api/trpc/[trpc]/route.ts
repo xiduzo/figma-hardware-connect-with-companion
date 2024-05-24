@@ -1,5 +1,5 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { env } from "~/env";
 import { appRouter } from "~/server/api/root";
@@ -15,8 +15,41 @@ const createContext = async (req: NextRequest) => {
   });
 };
 
-const handler = (req: NextRequest) =>
-  fetchRequestHandler({
+const getCorsHeaders = (origin: string) => {
+  // Default options
+  const headers = {
+    "Access-Control-Allow-Methods": env.ALLOWED_HEADERS,
+    "Access-Control-Allow-Headers": env.ALLOWED_METHODS,
+    "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN,
+  };
+
+  // If allowed origin is set, check if origin is in allowed origins
+  const allowedOrigins = env.ALLOWED_ORIGIN.split(",");
+
+  // Validate server origin
+  if (allowedOrigins.includes("*")) {
+    headers["Access-Control-Allow-Origin"] = "*";
+  } else if (allowedOrigins.includes(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+
+  // Return result
+  return headers;
+};
+
+const handler = (req: NextRequest) => {
+  if (req.method === "OPTIONS") {
+    return NextResponse.json(
+      {},
+      {
+        status: 200,
+        statusText: "OK",
+        headers: getCorsHeaders(req.headers.get("Origin") ?? ""),
+      },
+    );
+  }
+
+  return fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
@@ -25,10 +58,11 @@ const handler = (req: NextRequest) =>
       env.NODE_ENV === "development"
         ? ({ path, error }) => {
             console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`
+              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
             );
           }
         : undefined,
   });
+};
 
-export { handler as GET, handler as POST };
+export { handler as GET, handler as OPTIONS, handler as POST };

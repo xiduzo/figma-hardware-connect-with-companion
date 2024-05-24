@@ -1,0 +1,14 @@
+{
+  "name": "Figma MQTT",
+  "id": "1373258770799080545",
+  "api": "1.0.0",
+  "editorType": ["figma"],
+  "permissions": [],
+  "main": "build/plugin/code.js",
+  "ui": "build/plugin/index.html",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "This plugin needs to connect to an MQTT broker to send and receive messages."
+  },
+  "documentAccess": "dynamic-page"
+}
