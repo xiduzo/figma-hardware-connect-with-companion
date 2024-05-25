@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
-import { authReadWriteKeys } from "~/server/db/schema";
+import { accounts, authReadWriteKeys } from "~/server/db/schema";
 import {
   createCallerFactory,
   createTRPCRouter,
@@ -12,37 +12,53 @@ export const authRouter = createTRPCRouter({
   refreshToken: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     console.log("refresh token", { ctx, input });
   }),
-  getReadWriteKeys: publicProcedure.query(async ({ ctx }) => {
+  createReadWriteKeys: publicProcedure.mutation(async ({ ctx }) => {
     const values = await ctx.db
       .insert(authReadWriteKeys)
       .values({})
       .returning();
+    console.log(values[0]);
     return values[0];
   }),
   getAccessToken: publicProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      const tokens = await ctx.db.query.authReadWriteKeys.findFirst({
+      const readWriteKeys = await ctx.db.query.authReadWriteKeys.findFirst({
         where: eq(authReadWriteKeys.read, input),
       });
 
-      if (tokens?.token) {
-        await ctx.db
-          .delete(authReadWriteKeys)
-          .where(eq(authReadWriteKeys.read, input));
+      if (readWriteKeys?.accountId) {
+        return ctx.db.transaction(async (transaction) => {
+          await transaction
+            .delete(authReadWriteKeys)
+            .where(eq(authReadWriteKeys.read, input));
+
+          const tokens = await transaction.query.accounts.findFirst({
+            where: eq(accounts.providerAccountId, readWriteKeys.accountId!),
+          });
+
+          return {
+            accessToken: tokens?.access_token,
+            refreshToken: tokens?.refresh_token,
+            expiresAt: tokens?.expires_at,
+          };
+        });
       }
 
-      return tokens;
+      return undefined;
     }),
+  // TODO: make this a serverProtectedProcedure
   setReadWriteAuthToken: publicProcedure
-    .input(z.object({ write: z.string(), token: z.string() }))
+    .input(
+      z.object({
+        write: z.string(),
+        accountId: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      // TODO: make this a serverProtectedProcedure
       await ctx.db
         .update(authReadWriteKeys)
-        .set({
-          token: input.token,
-        })
+        .set(input)
         .where(eq(authReadWriteKeys.write, input.write));
     }),
 });

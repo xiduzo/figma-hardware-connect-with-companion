@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 
 import { TRPCReactProvider } from "../../trpc/react";
-import { AuthProvider } from "./providers/AuthProvider";
+import { Button, Text } from "./components";
+import "./index.css";
+import { AuthProvider, useAuth } from "./providers/AuthProvider";
 import { trpc } from "./trpc";
 
 export function App() {
   return (
-    <AuthProvider>
-      <TRPCReactProvider source="figma-ui">
-        Hello worldsss
+    <TRPCReactProvider source="figma-ui">
+      <AuthProvider>
+        <Text>hi</Text>
+        <Button>hi asdas</Button>
         <Test />
-        {/* <Auth /> */}
-      </TRPCReactProvider>
-    </AuthProvider>
+        <Auth />
+      </AuthProvider>
+    </TRPCReactProvider>
   );
 }
 
@@ -28,22 +31,9 @@ function Test() {
 }
 
 function Auth() {
-  const { data } = trpc.auth.getReadWriteKeys.useQuery();
+  const { auth } = useAuth();
 
-  const { data: tokens } = trpc.auth.getAccessToken.useQuery(data?.read ?? "", {
-    enabled: !!data?.read,
-    refetchInterval: 1000,
-  });
-
-  console.log(data, tokens);
-  function handleAuth() {
-    if (!data) return;
-    window.open(
-      `http://localhost:3000/api/auth/signin?figma-write-key=${data.write}`,
-      "_blank",
-    );
-  }
-  return <button onClick={handleAuth}>auth</button>;
+  return <Button onClick={auth}>auth</Button>;
 }
 
 export default App;

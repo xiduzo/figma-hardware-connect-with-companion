@@ -132,7 +132,9 @@ export const authReadWriteKeys = createTable(
   {
     read: uuid("read").defaultRandom().notNull(),
     write: uuid("write").defaultRandom().notNull(),
-    token: varchar("token", { length: 255 }),
+    accountId: varchar("accountId", { length: 255 }).references(
+      () => accounts.providerAccountId,
+    ),
   },
   (authReadWriteKeys) => ({
     compoundKey: primaryKey({ columns: [authReadWriteKeys.read] }),

@@ -69,7 +69,7 @@ export function TRPCReactProvider(props: {
               ...options,
               credentials: "same-origin",
               headers: {
-                "content-type": "whatt",
+                "Content-Type": "application/json",
                 "x-trpc-source": props.source,
               },
             });

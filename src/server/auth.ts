@@ -1,8 +1,8 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
-    getServerSession,
-    type DefaultSession,
-    type NextAuthOptions,
+  getServerSession,
+  type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
@@ -53,11 +53,11 @@ export const authOptions: NextAuthOptions = {
     signIn: async ({ account }) => {
       const cookieJar = cookies();
       const figmaWriteKey = cookieJar.get("figma-write-key");
-      if(figmaWriteKey && account?.access_token) {
+      if (figmaWriteKey && account?.providerAccountId) {
         await authCaller.setReadWriteAuthToken({
-          token: account.access_token,
+          accountId: account.providerAccountId,
           write: figmaWriteKey.value,
-        })
+        });
       }
       return true;
     },
