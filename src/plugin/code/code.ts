@@ -4,6 +4,6 @@ figma.showUI(__html__, {
   themeColors: true,
 });
 
-figma.ui.onmessage = (message) => {
-  console.log(message);
+figma.ui.onmessage = (message: unknown) => {
+  console.log({ message });
 };

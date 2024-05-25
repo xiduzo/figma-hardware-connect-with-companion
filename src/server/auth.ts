@@ -1,15 +1,17 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
-  getServerSession,
-  type DefaultSession,
-  type NextAuthOptions,
+    getServerSession,
+    type DefaultSession,
+    type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
+import { cookies } from "next/headers";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { createTable } from "~/server/db/schema";
+import { authCaller } from "./api/routers/auth";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -39,13 +41,26 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, user }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+        },
+      };
+    },
+    signIn: async ({ account }) => {
+      const cookieJar = cookies();
+      const figmaWriteKey = cookieJar.get("figma-write-key");
+      if(figmaWriteKey && account?.access_token) {
+        await authCaller.setReadWriteAuthToken({
+          token: account.access_token,
+          write: figmaWriteKey.value,
+        })
+      }
+      return true;
+    },
   },
   adapter: DrizzleAdapter(db, createTable) as Adapter,
   providers: [
