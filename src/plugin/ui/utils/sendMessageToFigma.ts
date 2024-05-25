@@ -1,5 +1,7 @@
-export function sendMessageToFigma(
-  message: unknown,
+import { type Message } from "../types";
+
+export function sendMessageToFigma<T>(
+  message: Message<T>,
   targetOrigin = "*",
   transfer?: Transferable[],
 ) {

@@ -11,8 +11,10 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import { accounts, users } from "../db/schema";
 
 /**
  * 1. CONTEXT
@@ -27,7 +29,27 @@ import { db } from "~/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await getServerAuthSession();
+  let session = await getServerAuthSession();
+
+  const auth = opts.headers.get("Authorization")
+
+  if (!session && auth) {
+    console.log("no server auth session, but has authorization header");
+    const account = await db.query.accounts.findFirst({
+      where: eq(accounts.access_token, auth),
+      with: {
+        user: true
+      }
+    })
+
+    if(account) {
+      session = {
+        user: account.user,
+        expires: `${account.expires_at}`
+      }
+    }
+
+  }
 
   return {
     db,

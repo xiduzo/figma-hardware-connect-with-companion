@@ -2,13 +2,13 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  httpBatchLink,
-  loggerLink,
-  unstable_httpBatchStreamLink,
+    httpBatchLink,
+    loggerLink,
+    unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SuperJSON from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
@@ -41,43 +41,56 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+let token: string | undefined = undefined;
+
 export function TRPCReactProvider(props: {
   children: React.ReactNode;
   source: string;
+  accessToken?: string;
 }) {
   const queryClient = getQueryClient();
 
-  const [trpcClient] = useState(() =>
-    api.createClient({
+  const [trpcClient, setTrpcClient] = useState<
+    ReturnType<typeof api.createClient> | undefined
+  >();
+
+  console.log(props.accessToken);
+
+  useEffect(() => {
+    token = props.accessToken;
+  }, [props.accessToken])
+
+  useEffect(() => {
+    const batchLink = ["figma-ui"].includes(props.source)
+      ? httpBatchLink
+      : unstable_httpBatchStreamLink;
+
+    const client = api.createClient({
       links: [
         loggerLink({
           enabled: (op) =>
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        httpBatchLink({
+        batchLink({
           transformer: SuperJSON,
           url: getBaseUrl() + "/api/trpc",
           headers: () => {
             const headers = new Headers();
-            headers.set("x-trpc-source", props.source);
+            headers.set("x-trpc-source", props.source + "foo");
             headers.set("Content-Type", "application/json");
-            return headers;
-          },
-          fetch: (url, options) => {
-            return fetch(url, {
-              ...options,
-              credentials: "same-origin",
-              headers: {
-                "Content-Type": "application/json",
-                "x-trpc-source": props.source,
-              },
-            });
-          },
+            if (token) headers.set("Authorization", token);
+
+            return headers
+          }
         }),
       ],
-    }),
-  );
+    });
+
+    setTrpcClient(client);
+  }, [props.source, props.accessToken]);
+
+  if (!trpcClient) return null;
 
   return (
     <QueryClientProvider client={queryClient}>

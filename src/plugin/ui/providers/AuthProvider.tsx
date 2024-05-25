@@ -4,7 +4,10 @@ import React, {
   useState,
   type PropsWithChildren,
 } from "react";
+import { type RouterOutputs } from "../../../trpc/react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { trpc } from "../trpc";
+import { LOCAL_STORAGE_KEYS } from "../types";
 
 const AuthContext = createContext({
   auth: (): Promise<void> => {
@@ -13,7 +16,13 @@ const AuthContext = createContext({
   isAuthenticating: false,
 });
 
+type Tokens = RouterOutputs["auth"]["getAccessToken"];
+
 export function AuthProvider({ children }: PropsWithChildren) {
+  const [, setLocalTokens] = useLocalStorage<Tokens>(
+    LOCAL_STORAGE_KEYS.AUTH_TOKENS,
+  );
+
   const [refetchInterval, setRefetchInterval] = useState<number | undefined>(
     undefined,
   );
@@ -45,7 +54,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!tokens?.accessToken) return;
 
     setRefetchInterval(undefined);
-  }, [tokens]);
+    setLocalTokens(tokens);
+  }, [tokens, setLocalTokens]);
 
   return (
     <AuthContext.Provider value={{ auth, isAuthenticating: false }}>

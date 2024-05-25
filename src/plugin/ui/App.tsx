@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 
-import { TRPCReactProvider } from "../../trpc/react";
+import { TRPCReactProvider, type RouterOutputs } from "../../trpc/react";
 import { Button, Text } from "./components";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import "./index.css";
 import { AuthProvider, useAuth } from "./providers/AuthProvider";
 import { trpc } from "./trpc";
+import { LOCAL_STORAGE_KEYS } from "./types";
+
+type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
 export function App() {
+  const [localTokens] = useLocalStorage<Tokens>(LOCAL_STORAGE_KEYS.AUTH_TOKENS);
   return (
-    <TRPCReactProvider source="figma-ui">
+    <TRPCReactProvider
+      source="figma-ui"
+      accessToken={localTokens?.accessToken ?? undefined}
+    >
       <AuthProvider>
         <Text>hi</Text>
         <Button>hi asdas</Button>
