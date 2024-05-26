@@ -68,6 +68,12 @@ export function MqttProvider({ children }: PropsWithChildren) {
     },
   );
 
+  const clearConnection = useCallback(() => {
+    client.current = undefined;
+    setIsConnected(false);
+    subscriptions.current.clear();
+  }, []);
+
   const connect = useCallback(
     async (options: mqtt.IClientOptions) => {
       const newClient = await mqtt.connectAsync({
@@ -75,11 +81,7 @@ export function MqttProvider({ children }: PropsWithChildren) {
         protocol: "wss",
       });
 
-      newClient.on("disconnect", () => {
-        client.current = undefined;
-        subscriptions.current.clear();
-        setIsConnected(false);
-      });
+      newClient.on("disconnect", clearConnection);
 
       newClient.on("message", (topic, message) => {
         const callback = subscriptions.current.get(topic);
@@ -97,19 +99,18 @@ export function MqttProvider({ children }: PropsWithChildren) {
       setIsConnected(true);
       sendMessage(undefined);
     },
-    [sendMessage],
+    [sendMessage, clearConnection],
   );
 
   const disconnect = useCallback(
     (callback?: (error?: Error) => void) => {
       client.current?.end((error) => {
-        client.current = undefined;
-        setIsConnected(false);
+        clearConnection();
         callback?.(error);
       });
       setMqttConnection((prev) => prev && { ...prev, autoConnect: false });
     },
-    [setMqttConnection],
+    [setMqttConnection, clearConnection],
   );
 
   function handleMessage(variable: Variable) {
