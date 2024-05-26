@@ -9,18 +9,27 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { trpc } from "../trpc";
 import { LOCAL_STORAGE_KEYS } from "../types";
 
-const AuthContext = createContext({
+type AuthContext = {
+  auth: () => Promise<void>;
+  isAuthenticating?: boolean;
+  user?: {
+    id: string;
+    email?: string | null;
+    image?: string | null;
+    name?: string | null;
+  };
+};
+
+const AuthContext = createContext<AuthContext>({
   auth: (): Promise<void> => {
     throw new Error("Not implemented");
   },
-  userId: "",
-  isAuthenticating: false,
 });
 
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [, setLocalTokens] = useLocalStorage<Tokens>(
+  const [localTokens, setLocalTokens] = useLocalStorage<Tokens>(
     LOCAL_STORAGE_KEYS.AUTH_TOKENS,
   );
 
@@ -33,10 +42,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     },
   });
 
-  const { data: tokens } = trpc.auth.getAccessToken.useQuery(data?.read ?? "", {
-    enabled: !!refetchInterval,
-    refetchInterval,
+  const { data: user } = trpc.auth.me.useQuery(undefined, {
+    enabled: !!localTokens?.accessToken,
   });
+
+  const { data: tokens, status } = trpc.auth.getAccessToken.useQuery(
+    data?.read ?? "",
+    {
+      enabled: !!refetchInterval,
+      refetchInterval,
+    },
+  );
 
   async function auth() {
     await mutateAsync();
@@ -58,9 +74,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setLocalTokens(tokens);
   }, [tokens, setLocalTokens]);
 
+  console.log({ user });
+
   return (
     <AuthContext.Provider
-      value={{ auth, isAuthenticating: false, userId: "1234" }}
+      value={{
+        auth,
+        isAuthenticating: data !== undefined && status !== "success",
+        user: user?.user,
+      }}
     >
       {children}
     </AuthContext.Provider>

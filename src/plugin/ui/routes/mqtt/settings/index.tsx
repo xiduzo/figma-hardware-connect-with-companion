@@ -22,7 +22,7 @@ export default function Page() {
   const { connect, isConnected } = useMqtt();
   const navigate = useNavigate();
 
-  useSetWindowSize({ width: 300, height: 500 });
+  useSetWindowSize({ width: 280, height: 500 });
 
   const [localState, setLocalState] = useLocalStorage<MqttConnection>(
     LOCAL_STORAGE_KEYS.MQTT_CONNECTION,
@@ -38,7 +38,7 @@ export default function Page() {
   };
 
   return (
-    <div>
+    <>
       <Header title="Mqtt connection settings" />
       <ZodFormProvider
         schema={mqttConnection}
@@ -79,7 +79,7 @@ export default function Page() {
         </Fieldset>
         <FormActions />
       </ZodFormProvider>
-    </div>
+    </>
   );
 }
 

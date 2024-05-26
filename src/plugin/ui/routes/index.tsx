@@ -5,24 +5,38 @@ import {
   Button,
   ButtonGroup,
   ConnectionIndicator,
+  Header,
   IconButton,
   Text,
   Title,
 } from "../components";
 import { useSetWindowSize } from "../hooks/useSetWindowSize";
+import { useAuth } from "../providers";
 import { useMqtt } from "../providers/MqttProvider";
 
 export default function Page() {
-  useSetWindowSize({ width: 300, height: 160 });
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  useSetWindowSize({ width: 280, height: 210 });
 
   return (
-    <section className="flex h-full flex-col items-stretch justify-center space-y-5">
-      <section className="text-center">
-        <Title>Figma MQTT</Title>
-        <Text dimmed>made with ♥️ by xiduzo</Text>
-      </section>
-      <MqttSection />
-    </section>
+    <>
+      <Header title="">
+        <div className="flex grow items-center space-x-2">
+          <IconButton
+            icon="UserCircleIcon"
+            onClick={() => navigate("/account")}
+          />
+          <Text dimmed>{user?.name ?? "anonymous"}</Text>
+        </div>
+      </Header>
+      <main className="flex grow flex-col items-stretch justify-center space-y-5">
+        <MqttSection />
+        <Text dimmed className="py-4 text-center">
+          made with ♥️ by xiduzo
+        </Text>
+      </main>
+    </>
   );
 }
 

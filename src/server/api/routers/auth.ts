@@ -5,10 +5,14 @@ import { accounts, authReadWriteKeys } from "~/server/db/schema";
 import {
   createCallerFactory,
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
 } from "../trpc";
 
 export const authRouter = createTRPCRouter({
+  me: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.session;
+  }),
   refreshToken: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     console.log("refresh token", { ctx, input });
   }),

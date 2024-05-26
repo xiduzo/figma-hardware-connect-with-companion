@@ -18,7 +18,7 @@ import { MESSAGE_TYPE } from "../../../types";
 export default function Page() {
   const { uid } = useMqtt();
   const [variables, setVariables] = useState<Variable[] | undefined>([]);
-  useSetWindowSize({ width: 600, height: 400 });
+  useSetWindowSize({ width: 600, height: 450 });
 
   useMessageListener<Variable[] | undefined>(
     MESSAGE_TYPE.GET_LOCAL_VARIABLES,
@@ -32,7 +32,7 @@ export default function Page() {
   return (
     <>
       <Header title="Mqtt connections"></Header>
-      <section className="max-h-80 divide-y divide-zinc-300 dark:divide-zinc-700">
+      <main className="max-h-80 divide-y divide-zinc-300 dark:divide-zinc-700">
         {variables?.map((variable) => {
           const topic = createTopic(variable.id, uid);
           return (
@@ -51,7 +51,7 @@ export default function Page() {
             </section>
           );
         })}
-      </section>
+      </main>
     </>
   );
 }
