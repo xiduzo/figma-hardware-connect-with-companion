@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
+import { ShowToast } from "../types";
+import { sendMessageToFigma } from "../utils/sendMessageToFigma";
 
 export function useCopyToClipboard() {
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
 
   function copyFunction(valueToCopy: string) {
-    setCopiedValue(valueToCopy);
     if ("clipboard" in navigator) {
-      void navigator.clipboard.writeText(valueToCopy);
-      return;
+      return navigator.clipboard
+        .writeText(valueToCopy)
+        .then(() => {
+          setCopiedValue(valueToCopy);
+        })
+        .catch(console.error);
     }
 
     if ("copy" in window) {
       // @ts-expect-error ignore TS error
       void window.copy(valueToCopy);
+      setCopiedValue(valueToCopy);
       return;
     }
 
@@ -23,8 +29,16 @@ export function useCopyToClipboard() {
     area.value = valueToCopy;
     area.focus();
     area.select();
-    document.execCommand("copy");
+    const success = document.execCommand("copy");
     document.body.removeChild(area);
+    if (success) {
+      setCopiedValue(valueToCopy);
+      return;
+    }
+
+    sendMessageToFigma(
+      ShowToast("Unabled to copy to clipboard", { error: true }),
+    );
   }
 
   useEffect(() => {

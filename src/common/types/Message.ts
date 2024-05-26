@@ -4,6 +4,7 @@ export enum MESSAGE_TYPE {
   SET_UI_OPTIONS = "SET_UI_OPTIONS",
   GET_LOCAL_VARIABLES = "GET_LOCAL_VARIABLES",
   SET_LOCAL_VARIABLE = "SET_LOCAL_VARIABLE",
+  SHOW_TOAST = "SHOW_TOAST",
 }
 
 export enum LOCAL_STORAGE_KEYS {
@@ -83,11 +84,29 @@ export function SetLocalValiable<T extends VariableValue>(
   };
 }
 
+type ShowToastMessage = {
+  type: MESSAGE_TYPE.SHOW_TOAST;
+  payload: {
+    message: string;
+    options?: NotificationOptions;
+  };
+};
+export function ShowToast(
+  message: string,
+  options?: NotificationOptions,
+): ShowToastMessage {
+  return {
+    type: MESSAGE_TYPE.SHOW_TOAST,
+    payload: { message, options },
+  };
+}
+
 export type Message<T> =
   | GetSetLocalStateValueMessage<T>
   | SetUiOptionsMessage
   | GetLocalVariablesMessage
-  | SetLocalVariableMessage<T>;
+  | SetLocalVariableMessage<T>
+  | ShowToastMessage;
 
 export type PluginMessage<T> = {
   pluginMessage: { type: MESSAGE_TYPE; payload?: T };

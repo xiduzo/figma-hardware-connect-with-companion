@@ -49,6 +49,7 @@ type Props<
   Schema extends ZodType<Output, ZodTypeDef> = ZodType<Output, ZodTypeDef>,
 > = PropsWithChildren & {
   schema: Schema;
-  onValid: (data: unknown) => void | Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onValid: (data: any) => void | Promise<void>;
   onInvalid: SubmitErrorHandler<Output>;
 } & Omit<UseFormProps<z.infer<Schema>>, "resolver">;

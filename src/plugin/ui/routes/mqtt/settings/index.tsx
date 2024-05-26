@@ -3,18 +3,18 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import {
-    Button,
-    Fieldset,
-    FormCheckBox,
-    FormInput,
-    Header,
+  Button,
+  Fieldset,
+  FormCheckBox,
+  FormInput,
+  Header,
 } from "../../../components";
 import { useLocalStorage, useSetWindowSize } from "../../../hooks/";
 import {
-    ZodFormProvider,
-    mqttConnection,
-    useMqtt,
-    type MqttConnection,
+  ZodFormProvider,
+  mqttConnection,
+  useMqtt,
+  type MqttConnection,
 } from "../../../providers";
 import { LOCAL_STORAGE_KEYS } from "../../../types";
 
@@ -42,7 +42,7 @@ export default function Page() {
       <Header title="Mqtt connection settings" />
       <ZodFormProvider
         schema={mqttConnection}
-        onValid={console.log}
+        onValid={handleValid}
         onInvalid={console.log}
         defaultValues={localState}
       >

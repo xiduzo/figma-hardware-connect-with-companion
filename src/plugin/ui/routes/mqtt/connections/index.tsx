@@ -42,11 +42,12 @@ export default function Page() {
                   <TypeIcon resolvedType={variable.resolvedType} />
                   <Text>{variable.name}</Text>
                 </div>
-                <Text dimmed>{topic}</Text>
+                <div className="flex items-center space-x-2">
+                  <Text dimmed> {topic}</Text>
+                  <CopyTopicButton topic={topic} />
+                </div>
               </section>
-              <ButtonGroup>
-                <CopyTopicButton topic={topic} />
-              </ButtonGroup>
+              <ButtonGroup></ButtonGroup>
             </section>
           );
         })}
@@ -59,7 +60,7 @@ function CopyTopicButton({ topic }: { topic: string }) {
   const [copiedValue, copy] = useCopyToClipboard();
 
   async function handleClicked() {
-    copy(topic);
+    await copy(topic);
   }
 
   return (
@@ -67,7 +68,8 @@ function CopyTopicButton({ topic }: { topic: string }) {
       icon={
         copiedValue ? "ClipboardDocumentCheckIcon" : "ClipboardDocumentIcon"
       }
-      className={copiedValue ? "text-green-500 dark:text-green-400" : undefined}
+      intent={copiedValue ? "success" : "none"}
+      className={`opacity-60 transition-opacity duration-75 hover:opacity-100 ${copiedValue ? "" : "cursor-copy"}`}
       onClick={handleClicked}
     />
   );

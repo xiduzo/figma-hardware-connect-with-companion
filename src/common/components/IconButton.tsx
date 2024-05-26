@@ -3,10 +3,10 @@ import React from "react";
 import { cva } from "class-variance-authority";
 import { Icon, type IconProps } from "./Icon";
 
-export function IconButton({ icon, className, ...buttonProps }: Props) {
+export function IconButton({ icon, className, intent, ...buttonProps }: Props) {
   return (
     <button {...buttonProps} className={iconButton({ className })}>
-      <Icon icon={icon} className={className} />
+      <Icon icon={icon} intent={intent} />
     </button>
   );
 }

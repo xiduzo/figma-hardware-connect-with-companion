@@ -20,7 +20,7 @@ const button = cva(
         warning: "text-white bg-yellow-500",
         danger: "text-white bg-red-500",
         plain:
-          "text-zinc-800 border-zinc-800 dark:text-zinc-100 dark:border-zinc-100 dark:active:bg-zinc-50 active:bg-zinc-600 active:bg-opacity-5",
+          "text-zinc-800 border-zinc-800 dark:text-zinc-100 dark:border-zinc-100 dark:active:bg-zinc-50 active:bg-zinc-600 active:bg-opacity-5 dark:active:bg-opacity-5",
       },
     },
     defaultVariants: {
