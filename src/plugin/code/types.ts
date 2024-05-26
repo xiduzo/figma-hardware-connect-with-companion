@@ -1,1 +1,1 @@
-export * from "../../common/types/Message.js";
+export * from "../../common/types/index.js";

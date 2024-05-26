@@ -14,8 +14,8 @@ import { z } from "zod";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useMessageListener } from "../hooks/useMessageListener";
 import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE, SetLocalValiable } from "../types";
+import { cuid } from "../utils/cuid";
 import { sendMessageToFigma } from "../utils/sendMessageToFigma";
-import { toBoolean, toFigmaRgb } from "../utils/typeValidators";
 
 type Callback<T> = (message: T) => void;
 
@@ -31,6 +31,7 @@ export type MqttConnection = z.infer<typeof mqttConnection>;
 
 const MqttContext = createContext({
   isConnected: false,
+  uid: "",
   connect: async (options: mqtt.IClientOptions): Promise<void> => {
     console.log("MqttProvider not found", { options });
     throw new Error("MqttProvider not found");
@@ -41,13 +42,16 @@ const MqttContext = createContext({
   },
 });
 
-export function createTopic(uid: string, variable: string) {
-  return `figma-mqtt/${uid}/${variable}`;
+export function createTopic(variable: string, id?: string) {
+  return `figma-mqtt/${id ?? cuid()}/${variable}`;
 }
 
 export function MqttProvider({ children }: PropsWithChildren) {
   const client = useRef<mqtt.MqttClient>();
   const [isConnected, setIsConnected] = useState(false);
+  const [uid] = useLocalStorage(LOCAL_STORAGE_KEYS.TOPIC_UID, {
+    initialValue: cuid(),
+  });
 
   const [mqttConnection, setMqttConnection] = useLocalStorage<MqttConnection>(
     LOCAL_STORAGE_KEYS.MQTT_CONNECTION,
@@ -110,27 +114,7 @@ export function MqttProvider({ children }: PropsWithChildren) {
 
   function handleMessage(variable: Variable) {
     function handleValue(value: Buffer) {
-      switch (variable.resolvedType) {
-        case "BOOLEAN":
-          sendMessageToFigma(
-            SetLocalValiable(variable.id, toBoolean(value.toString())),
-          );
-          break;
-        case "FLOAT":
-          sendMessageToFigma(
-            SetLocalValiable(variable.id, Number(value.toString())),
-          );
-          break;
-        case "COLOR":
-          sendMessageToFigma(
-            SetLocalValiable(variable.id, toFigmaRgb(value.toString())),
-          );
-          break;
-        case "STRING":
-        default:
-          sendMessageToFigma(SetLocalValiable(variable.id, value.toString()));
-          break;
-      }
+      sendMessageToFigma(SetLocalValiable(variable.id, value.toString()));
     }
 
     return handleValue;
@@ -140,7 +124,7 @@ export function MqttProvider({ children }: PropsWithChildren) {
     if (!client.current) return;
 
     const subscribedTopics = subscriptions.current.keys();
-    const topics = variables?.map(({ id }) => createTopic(id, id)) ?? [];
+    const topics = variables?.map(({ id }) => createTopic(id, uid)) ?? [];
 
     // Clear subscriptions that are no longer needed
     for (const subscribedTopic of subscribedTopics) {
@@ -153,7 +137,7 @@ export function MqttProvider({ children }: PropsWithChildren) {
 
     // Add new subscriptions
     for (const variable of variables ?? []) {
-      const topic = createTopic(variable.id, variable.id);
+      const topic = createTopic(variable.id, uid);
       if (!subscriptions.current.has(topic)) {
         console.log("subscribing to", { topic, variable });
         await client.current?.subscribeAsync(topic);
@@ -168,7 +152,9 @@ export function MqttProvider({ children }: PropsWithChildren) {
   }, [mqttConnection, connect]);
 
   return (
-    <MqttContext.Provider value={{ connect, disconnect, isConnected }}>
+    <MqttContext.Provider
+      value={{ connect, disconnect, isConnected, uid: uid ?? cuid() }}
+    >
       {children}
     </MqttContext.Provider>
   );

@@ -13,6 +13,7 @@ const AuthContext = createContext({
   auth: (): Promise<void> => {
     throw new Error("Not implemented");
   },
+  userId: "",
   isAuthenticating: false,
 });
 
@@ -58,7 +59,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [tokens, setLocalTokens]);
 
   return (
-    <AuthContext.Provider value={{ auth, isAuthenticating: false }}>
+    <AuthContext.Provider
+      value={{ auth, isAuthenticating: false, userId: "1234" }}
+    >
       {children}
     </AuthContext.Provider>
   );

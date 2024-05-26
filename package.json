@@ -44,11 +44,13 @@
     "react-router-dom": "6.23.1",
     "server-only": "0.0.1",
     "superjson": "2.2.1",
+    "unique-names-generator": "^4.7.1",
     "usehooks-ts": "3.1.0",
     "zod": "3.23.8"
   },
   "devDependencies": {
     "@figma/plugin-typings": "1.93.0",
+    "@total-typescript/ts-reset": "^0.5.1",
     "@types/eslint": "8.56.2",
     "@types/node": "20.11.20",
     "@types/react": "18.2.57",

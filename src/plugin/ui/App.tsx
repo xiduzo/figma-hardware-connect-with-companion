@@ -22,11 +22,9 @@ const router = createMemoryRouter([
 
 export default function App() {
   const [localTokens] = useLocalStorage<Tokens>(LOCAL_STORAGE_KEYS.AUTH_TOKENS);
+
   return (
-    <TRPCReactProvider
-      source="figma-ui"
-      accessToken={localTokens?.accessToken ?? undefined}
-    >
+    <TRPCReactProvider source="figma-ui" accessToken={localTokens?.accessToken}>
       <AuthProvider>
         <MqttProvider>
           <RouterProvider router={router} />

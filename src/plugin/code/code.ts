@@ -19,7 +19,7 @@ figma.ui.onmessage = <T>(message: Message<T>) => {
       break;
     }
     case MESSAGE_TYPE.GET_LOCAL_STATE_VALUE: {
-      void getLocalValue(payload.key);
+      void getLocalValue(payload.key, payload.value);
       break;
     }
     case MESSAGE_TYPE.GET_LOCAL_VARIABLES: {

@@ -2,13 +2,13 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-    httpBatchLink,
-    loggerLink,
-    unstable_httpBatchStreamLink,
+  httpBatchLink,
+  loggerLink,
+  unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SuperJSON from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
@@ -41,12 +41,12 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-let token: string | undefined = undefined;
+let token: string | undefined | null = undefined;
 
 export function TRPCReactProvider(props: {
   children: React.ReactNode;
   source: string;
-  accessToken?: string;
+  accessToken?: string | null;
 }) {
   const queryClient = getQueryClient();
 
@@ -58,7 +58,7 @@ export function TRPCReactProvider(props: {
 
   useEffect(() => {
     token = props.accessToken;
-  }, [props.accessToken])
+  }, [props.accessToken]);
 
   useEffect(() => {
     const batchLink = ["figma-ui"].includes(props.source)
@@ -81,8 +81,8 @@ export function TRPCReactProvider(props: {
             headers.set("Content-Type", "application/json");
             if (token) headers.set("Authorization", token);
 
-            return headers
-          }
+            return headers;
+          },
         }),
       ],
     });

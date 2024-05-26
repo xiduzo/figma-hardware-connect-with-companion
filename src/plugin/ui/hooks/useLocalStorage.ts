@@ -32,7 +32,7 @@ export function useLocalStorage<T>(
     sendMessageToFigma(GetLocalStateValue(key, options?.initialValue));
   }, [key, options?.initialValue]);
 
-  useMessageListener<{ key: LOCAL_STORAGE_KEYS; value: T | undefined }>(
+  useMessageListener<{ key: LOCAL_STORAGE_KEYS; value?: T }>(
     MESSAGE_TYPE.GET_LOCAL_STATE_VALUE,
     (payload) => {
       if (payload?.key !== key) return;
@@ -42,7 +42,7 @@ export function useLocalStorage<T>(
     { intervalInMs: options?.updateInterval },
   );
 
-  useMessageListener<{ key: LOCAL_STORAGE_KEYS; value: T | undefined }>(
+  useMessageListener<{ key: LOCAL_STORAGE_KEYS; value?: T }>(
     MESSAGE_TYPE.SET_LOCAL_STATE_VALUE,
     (payload) => {
       if (payload?.key !== key) return;

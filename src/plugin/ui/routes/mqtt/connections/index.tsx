@@ -1,21 +1,22 @@
 import React, { useState } from "react";
 import {
-    ButtonGroup,
-    Header,
-    Icon,
-    IconButton,
-    Text,
+  ButtonGroup,
+  Header,
+  Icon,
+  IconButton,
+  Text,
 } from "../../../components";
 
 import {
-    useCopyToClipboard,
-    useMessageListener,
-    useSetWindowSize,
+  useCopyToClipboard,
+  useMessageListener,
+  useSetWindowSize,
 } from "../../../hooks";
-import { createTopic } from "../../../providers";
+import { createTopic, useMqtt } from "../../../providers";
 import { MESSAGE_TYPE } from "../../../types";
 
 export default function Page() {
+  const { uid } = useMqtt();
   const [variables, setVariables] = useState<Variable[] | undefined>([]);
   useSetWindowSize({ width: 600, height: 400 });
 
@@ -32,29 +33,33 @@ export default function Page() {
     <>
       <Header title="Mqtt connections"></Header>
       <section className="max-h-80 divide-y divide-zinc-300 dark:divide-zinc-700">
-        {variables?.map((variable) => (
-          <section key={variable.id} className="flex justify-between py-2">
-            <section className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <TypeIcon resolvedType={variable.resolvedType} />
-                <Text>{variable.name}</Text>
-              </div>
-              <Text dimmed>{createTopic(variable.id, variable.id)}</Text>
+        {variables?.map((variable) => {
+          const topic = createTopic(variable.id, uid);
+          return (
+            <section key={variable.id} className="flex justify-between py-2">
+              <section className="flex flex-col">
+                <div className="flex items-center space-x-2">
+                  <TypeIcon resolvedType={variable.resolvedType} />
+                  <Text>{variable.name}</Text>
+                </div>
+                <Text dimmed>{topic}</Text>
+              </section>
+              <ButtonGroup>
+                <CopyTopicButton topic={topic} />
+              </ButtonGroup>
             </section>
-            <ButtonGroup>
-              <CopyTopicButton />
-            </ButtonGroup>
-          </section>
-        ))}
+          );
+        })}
       </section>
     </>
   );
 }
 
-function CopyTopicButton() {
+function CopyTopicButton({ topic }: { topic: string }) {
   const [copiedValue, copy] = useCopyToClipboard();
+
   async function handleClicked() {
-    copy(createTopic("id", "id"));
+    copy(topic);
   }
 
   return (
@@ -62,7 +67,7 @@ function CopyTopicButton() {
       icon={
         copiedValue ? "ClipboardDocumentCheckIcon" : "ClipboardDocumentIcon"
       }
-      className={copiedValue ? "text-green-500 dark:text-green-500" : undefined}
+      className={copiedValue ? "text-green-500 dark:text-green-400" : undefined}
       onClick={handleClicked}
     />
   );
