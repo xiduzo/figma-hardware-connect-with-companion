@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { useInterval } from "usehooks-ts";
 import {
-    GetLocalStateValue,
-    MESSAGE_TYPE,
-    SetLocalStateValue,
-    type LOCAL_STORAGE_KEYS,
+  GetLocalStateValue,
+  MESSAGE_TYPE,
+  SetLocalStateValue,
+  type LOCAL_STORAGE_KEYS,
 } from "../types";
 import { sendMessageToFigma } from "../utils/sendMessageToFigma";
 import { useMessageListener } from "./useMessageListener";
@@ -13,10 +12,9 @@ type Update<T> = T | ((prev?: T) => T | undefined);
 
 export function useLocalStorage<T>(
   key: LOCAL_STORAGE_KEYS,
-  initialValue?: T,
-  updateInterval?: number,
+  options?: { initialValue?: T; updateInterval?: number },
 ) {
-  const [state, setState] = useState(initialValue);
+  const [state, setState] = useState(options?.initialValue);
 
   const setLocalState = useCallback(
     (update?: Update<T>) => {
@@ -31,12 +29,8 @@ export function useLocalStorage<T>(
   );
 
   useEffect(() => {
-    sendMessageToFigma(GetLocalStateValue(key, initialValue));
-  }, [key, initialValue]);
-
-  useInterval(() => {
-    sendMessageToFigma(GetLocalStateValue(key, initialValue));
-  }, updateInterval ?? null);
+    sendMessageToFigma(GetLocalStateValue(key, options?.initialValue));
+  }, [key, options?.initialValue]);
 
   useMessageListener<{ key: LOCAL_STORAGE_KEYS; value: T | undefined }>(
     MESSAGE_TYPE.GET_LOCAL_STATE_VALUE,
@@ -45,6 +39,7 @@ export function useLocalStorage<T>(
 
       setState(payload.value);
     },
+    { intervalInMs: options?.updateInterval },
   );
 
   useMessageListener<{ key: LOCAL_STORAGE_KEYS; value: T | undefined }>(

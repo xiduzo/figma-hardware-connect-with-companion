@@ -1,16 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 
+import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import { TRPCReactProvider, type RouterOutputs } from "../../trpc/react";
-import { Button, Text } from "./components";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import "./index.css";
-import { AuthProvider, useAuth } from "./providers/AuthProvider";
-import { trpc } from "./trpc";
+import { AuthProvider } from "./providers/AuthProvider";
+import { MqttProvider } from "./providers/MqttProvider";
 import { LOCAL_STORAGE_KEYS } from "./types";
 
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
-export function App() {
+import Home from "./routes/index";
+import MqttConnections from "./routes/mqtt/connections";
+import MqttSettings from "./routes/mqtt/settings";
+
+const router = createMemoryRouter([
+  { path: "/", Component: Home },
+  { path: "/mqtt/settings", Component: MqttSettings },
+  { path: "/mqtt/connections", Component: MqttConnections },
+]);
+
+export default function App() {
   const [localTokens] = useLocalStorage<Tokens>(LOCAL_STORAGE_KEYS.AUTH_TOKENS);
   return (
     <TRPCReactProvider
@@ -18,30 +28,10 @@ export function App() {
       accessToken={localTokens?.accessToken ?? undefined}
     >
       <AuthProvider>
-        <Text>hi</Text>
-        <Button>hi asdas</Button>
-        <Test />
-        <Auth />
+        <MqttProvider>
+          <RouterProvider router={router} />
+        </MqttProvider>
       </AuthProvider>
     </TRPCReactProvider>
   );
 }
-
-function Test() {
-  const [state, setState] = useState(false);
-  const response = trpc.post.hello.useQuery({ text: "xiduzoooo" });
-
-  return (
-    <div onClick={() => setState(!state)}>
-      {response.data?.greeting ?? "loading"}
-    </div>
-  );
-}
-
-function Auth() {
-  const { auth } = useAuth();
-
-  return <Button onClick={auth}>auth</Button>;
-}
-
-export default App;

@@ -8,7 +8,7 @@ import {
 import { posts } from "~/server/db/schema";
 
 export const postRouter = createTRPCRouter({
-  hello: protectedProcedure
+  hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input, ctx }) => {
       console.log({ ctx }, ctx.headers);
