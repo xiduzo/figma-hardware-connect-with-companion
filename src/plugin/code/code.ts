@@ -4,8 +4,8 @@ import { getLocalVariables, setLocalvariable } from "./handlers/variables.js";
 import { MESSAGE_TYPE, type Message } from "./types.js";
 
 figma.showUI(__html__, {
-  width: 300,
-  height: 500,
+  width: 280,
+  height: 290,
   themeColors: true,
 });
 

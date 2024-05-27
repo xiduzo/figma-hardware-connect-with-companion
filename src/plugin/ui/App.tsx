@@ -14,12 +14,16 @@ import Home from "./routes";
 import Account from "./routes/account";
 import MqttConnections from "./routes/mqtt/connections";
 import MqttSettings from "./routes/mqtt/settings";
+import SerialConnections from "./routes/serial/connections";
+import SerialInfo from "./routes/serial/info";
 
 const router = createMemoryRouter([
   { path: "/", Component: Home },
+  { path: "/account", Component: Account },
   { path: "/mqtt/settings", Component: MqttSettings },
   { path: "/mqtt/connections", Component: MqttConnections },
-  { path: "/account", Component: Account },
+  { path: "/serial/connections", Component: SerialConnections },
+  { path: "/serial/info", Component: SerialInfo },
 ]);
 
 export default function App() {

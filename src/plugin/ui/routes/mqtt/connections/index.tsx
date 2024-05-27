@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import {
   ButtonGroup,
+  Code,
   Header,
   Icon,
   IconButton,
   Text,
+  Title,
 } from "../../../components";
 
+import { FIGMA_MQTT_COLLECTION_NAME } from "../../../constants";
 import {
   useCopyToClipboard,
   useMessageListener,
@@ -33,6 +36,21 @@ export default function Page() {
     <>
       <Header title="Mqtt connections"></Header>
       <main className="max-h-80 divide-y divide-zinc-300 dark:divide-zinc-700">
+        {!variables?.length && (
+          <section className="flex h-96 flex-col items-center justify-center text-center">
+            <Icon
+              dimmed
+              icon="CubeTransparentIcon"
+              className="mb-8 h-28 w-28"
+            />
+            <Title as="h2">No variables found</Title>
+            <Text dimmed className="mt-4 max-w-sm">
+              All variables created in the{" "}
+              <Code>{FIGMA_MQTT_COLLECTION_NAME}</Code> collection will
+              automatically make a MQTT connection.
+            </Text>
+          </section>
+        )}
         {variables?.map((variable) => {
           const topic = createTopic(variable.id, uid);
           return (

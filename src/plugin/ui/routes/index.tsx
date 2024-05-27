@@ -11,13 +11,13 @@ import {
   Title,
 } from "../components";
 import { useSetWindowSize } from "../hooks/useSetWindowSize";
-import { useAuth } from "../providers";
+import { AuthButton, useAuth } from "../providers";
 import { useMqtt } from "../providers/MqttProvider";
 
 export default function Page() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  useSetWindowSize({ width: 280, height: 210 });
+  useSetWindowSize({ width: 280, height: 295 });
 
   return (
     <>
@@ -32,6 +32,7 @@ export default function Page() {
       </Header>
       <main className="flex grow flex-col items-stretch justify-center space-y-5">
         <MqttSection />
+        <SerialSection />
         <Text dimmed className="py-4 text-center">
           made with ♥️ by xiduzo
         </Text>
@@ -64,6 +65,35 @@ function MqttSection() {
         <Button onClick={() => navigate("/mqtt/connections")}>
           Show connections
         </Button>
+      </section>
+    </section>
+  );
+}
+
+function SerialSection() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <section className="space-y-1.5">
+      <section className="flex items-center justify-between">
+        <ConnectionIndicator isConnected={!!user}>
+          <Title as="h2">Serial</Title>
+        </ConnectionIndicator>
+        <ButtonGroup>
+          <IconButton
+            icon="QuestionMarkCircleIcon"
+            onClick={() => navigate("/serial/info")}
+          />
+        </ButtonGroup>
+      </section>
+      <section>
+        {!user && <AuthButton signInText="Sign in to enable" />}
+        {user && (
+          <Button onClick={() => navigate("/serial/connections")}>
+            Show connections
+          </Button>
+        )}
       </section>
     </section>
   );

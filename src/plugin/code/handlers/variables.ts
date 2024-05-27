@@ -1,6 +1,5 @@
+import { FIGMA_MQTT_COLLECTION_NAME } from "../constants";
 import { GetLocalVariables } from "../types";
-
-const FIGMA_MQTT_COLLECTION_NAME = "Figma MQTT";
 
 export async function getLocalVariables() {
   const collection = await getCollection();

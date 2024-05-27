@@ -54,8 +54,6 @@ export function TRPCReactProvider(props: {
     ReturnType<typeof api.createClient> | undefined
   >();
 
-  console.log(props.accessToken);
-
   useEffect(() => {
     token = props.accessToken;
   }, [props.accessToken]);

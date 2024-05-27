@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   GetLocalStateValue,
   MESSAGE_TYPE,
@@ -15,15 +15,30 @@ export function useLocalStorage<T>(
   options?: { initialValue?: T; updateInterval?: number },
 ) {
   const [state, setState] = useState(options?.initialValue);
+  const localStatePromise = useRef<
+    [
+      ((value?: unknown) => void) | undefined,
+      ((reason?: unknown) => void) | undefined,
+    ]
+  >([undefined, undefined]);
 
   const setLocalState = useCallback(
     (update?: Update<T>) => {
-      sendMessageToFigma(
-        SetLocalStateValue(
-          key,
-          update instanceof Function ? update(state) : update,
-        ),
-      );
+      const [, reject] = localStatePromise.current;
+      reject?.("Cancelled");
+
+      return new Promise((resolve, reject) => {
+        localStatePromise.current = [resolve, reject];
+        sendMessageToFigma(
+          SetLocalStateValue(
+            key,
+            update instanceof Function ? update(state) : update,
+          ),
+        );
+        setTimeout(() => {
+          reject("Timeout");
+        }, 1000);
+      });
     },
     [key, state],
   );
@@ -46,6 +61,9 @@ export function useLocalStorage<T>(
     MESSAGE_TYPE.SET_LOCAL_STATE_VALUE,
     (payload) => {
       if (payload?.key !== key) return;
+      const [resolve] = localStatePromise.current;
+      console.log({ resolve });
+      resolve?.();
 
       setState(payload?.value);
     },

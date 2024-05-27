@@ -21,7 +21,6 @@ export const authRouter = createTRPCRouter({
       .insert(authReadWriteKeys)
       .values({})
       .returning();
-    console.log(values[0]);
     return values[0];
   }),
   getAccessToken: publicProcedure

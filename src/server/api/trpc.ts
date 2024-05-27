@@ -14,7 +14,7 @@ import { ZodError } from "zod";
 import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
-import { accounts, users } from "../db/schema";
+import { accounts } from "../db/schema";
 
 /**
  * 1. CONTEXT
@@ -31,24 +31,29 @@ import { accounts, users } from "../db/schema";
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   let session = await getServerAuthSession();
 
-  const auth = opts.headers.get("Authorization")
+  const auth = opts.headers.get("Authorization");
 
   if (!session && auth) {
-    console.log("no server auth session, but has authorization header");
     const account = await db.query.accounts.findFirst({
       where: eq(accounts.access_token, auth),
       with: {
-        user: true
-      }
-    })
+        user: {
+          columns: {
+            id: true,
+            email: true,
+            image: true,
+            name: true,
+          },
+        },
+      },
+    });
 
-    if(account) {
+    if (account) {
       session = {
         user: account.user,
-        expires: `${account.expires_at}`
-      }
+        expires: (account.expires_at ?? Date.now()).toString(),
+      };
     }
-
   }
 
   return {
