@@ -1,16 +1,13 @@
-import React, {
-  createContext,
-  useEffect,
-  useState,
-  type PropsWithChildren,
-} from "react";
+import React, { createContext, useEffect, type PropsWithChildren } from "react";
 import { type RouterOutputs } from "../../../trpc/react";
+import { Button } from "../components";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { trpc } from "../trpc";
 import { LOCAL_STORAGE_KEYS } from "../types";
 
 type AuthContext = {
-  auth: () => Promise<void>;
+  signIn: () => Promise<void>;
+  signOut: () => Promise<void>;
   isAuthenticating?: boolean;
   user?: {
     id: string;
@@ -21,7 +18,10 @@ type AuthContext = {
 };
 
 const AuthContext = createContext<AuthContext>({
-  auth: (): Promise<void> => {
+  signIn: (): Promise<void> => {
+    throw new Error("Not implemented");
+  },
+  signOut: (): Promise<void> => {
     throw new Error("Not implemented");
   },
 });
@@ -29,58 +29,63 @@ const AuthContext = createContext<AuthContext>({
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
 export function AuthProvider({ children }: PropsWithChildren) {
+  const utils = trpc.useUtils();
   const [localTokens, setLocalTokens] = useLocalStorage<Tokens>(
     LOCAL_STORAGE_KEYS.AUTH_TOKENS,
   );
 
-  const [refetchInterval, setRefetchInterval] = useState<number | undefined>(
-    undefined,
-  );
-  const { data, mutateAsync } = trpc.auth.createReadWriteKeys.useMutation({
-    onSuccess: () => {
-      setRefetchInterval(1000);
-    },
-  });
+  const {
+    data: readWriteKeys,
+    mutateAsync: createReadWriteKeys,
+    reset: clearReadWriteKeys,
+  } = trpc.auth.createReadWriteKeys.useMutation();
 
   const { data: user } = trpc.auth.me.useQuery(undefined, {
     enabled: !!localTokens?.accessToken,
+    retry: false,
   });
 
-  const { data: tokens, status } = trpc.auth.getAccessToken.useQuery(
-    data?.read ?? "",
-    {
-      enabled: !!refetchInterval,
-      refetchInterval,
-    },
-  );
+  const { data: tokens, status: getAccessTokenStatus } =
+    trpc.auth.getAccessToken.useQuery(readWriteKeys?.read ?? "", {
+      enabled: !!readWriteKeys,
+      refetchInterval: 1000,
+    });
 
-  async function auth() {
-    await mutateAsync();
+  async function signIn() {
+    await createReadWriteKeys();
+  }
+
+  async function signOut() {
+    await setLocalTokens(undefined);
+    await utils.auth.me.reset();
   }
 
   useEffect(() => {
-    if (!data?.write) return;
+    if (!readWriteKeys?.write) return;
 
     window.open(
-      `http://localhost:3000/api/auth/signin?figma-write-key=${data.write}`,
+      `http://localhost:3000/api/auth/signin?figma-write-key=${readWriteKeys.write}`,
       "_blank",
     );
-  }, [data?.write]);
+
+    // TODO
+    // set a timeout to clear readWriteKeys if the user doesn't sign in
+    // this will unblock the UI again
+  }, [readWriteKeys?.write]);
 
   useEffect(() => {
     if (!tokens?.accessToken) return;
-
-    setRefetchInterval(undefined);
-    setLocalTokens(tokens);
-  }, [tokens, setLocalTokens]);
-
-  console.log({ user });
+    clearReadWriteKeys(); // prevent re-fetching tokens
+    void setLocalTokens(tokens);
+  }, [tokens, setLocalTokens, clearReadWriteKeys]);
 
   return (
     <AuthContext.Provider
       value={{
-        auth,
-        isAuthenticating: data !== undefined && status !== "success",
+        signIn,
+        signOut,
+        isAuthenticating:
+          readWriteKeys !== undefined && getAccessTokenStatus !== "success",
         user: user?.user,
       }}
     >
@@ -90,3 +95,29 @@ export function AuthProvider({ children }: PropsWithChildren) {
 }
 
 export const useAuth = () => React.useContext(AuthContext);
+
+export function AuthButton({ signInText }: { signInText?: string }) {
+  const { signIn, signOut, user, isAuthenticating } = useAuth();
+
+  if (user) {
+    return (
+      <Button intent="danger" onClick={signOut}>
+        Sign out
+      </Button>
+    );
+  }
+
+  if (isAuthenticating) {
+    return (
+      <Button intent="info" disabled>
+        Waiting for sign in response...
+      </Button>
+    );
+  }
+
+  return (
+    <Button intent="info" onClick={signIn} disabled={isAuthenticating}>
+      {signInText ?? "Sign in"}
+    </Button>
+  );
+}
