@@ -1,4 +1,5 @@
 export * from "../../../common/providers";
 
 export * from "./AuthProvider";
-export * from "./MqttProvider";
+export * from "./FigmaMqttProvider";
+export * from "./InternalMqtProvider";

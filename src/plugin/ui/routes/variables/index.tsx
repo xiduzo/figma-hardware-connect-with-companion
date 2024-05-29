@@ -8,15 +8,15 @@ import {
   Text,
   Title,
   TypeIcon,
-} from "../../../components";
+} from "../../components";
 
-import { FIGMA_MQTT_COLLECTION_NAME } from "../../../constants";
+import { FIGMA_MQTT_COLLECTION_NAME } from "../../constants";
 import {
   useMessageListener,
   useSetWindowSize,
   useVariableId,
-} from "../../../hooks";
-import { MESSAGE_TYPE } from "../../../types";
+} from "../../hooks";
+import { MESSAGE_TYPE } from "../../types";
 
 export default function Page() {
   const { createTopic } = useVariableId();

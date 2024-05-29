@@ -13,7 +13,7 @@ const VariableResolvedDataType = [
 const VariableResolvedDataTypeSchema = z.enum(VariableResolvedDataType);
 
 export const figmaRouter = createTRPCRouter({
-  update: protectedProcedure
+  sync: protectedProcedure
     .input(
       z.array(
         z.object({
@@ -24,32 +24,27 @@ export const figmaRouter = createTRPCRouter({
       ),
     )
     .mutation(async ({ ctx, input }) => {
-      const areOldVariables = notInArray(
-        serialConnections.figmaVariableId,
-        input.map((variable) => variable.id),
-      );
-      const isFromUser = eq(serialConnections.userId, ctx.session.user.id);
-
       return ctx.db.transaction(async (transaction) => {
-        await transaction
-          .delete(serialConnections)
-          .where(and(areOldVariables, isFromUser));
+        await transaction.delete(serialConnections).where(
+          and(
+            notInArray(
+              serialConnections.id,
+              input.map(({ id }) => id),
+            ),
+            eq(serialConnections.userId, ctx.session.user.id),
+          ),
+        );
 
         return transaction
           .insert(serialConnections)
           .values(
             input.map((variable) => ({
-              name: variable.name,
-              resolvedType: variable.resolvedType,
+              ...variable,
               userId: ctx.session.user.id,
-              figmaVariableId: variable.id,
             })),
           )
           .onConflictDoUpdate({
-            target: [
-              serialConnections.figmaVariableId,
-              serialConnections.userId,
-            ],
+            target: [serialConnections.id, serialConnections.userId],
             set: {
               name: sql`excluded.name`,
             },

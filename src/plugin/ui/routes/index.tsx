@@ -11,8 +11,7 @@ import {
   Title,
 } from "../components";
 import { useSetWindowSize } from "../hooks/useSetWindowSize";
-import { AuthButton, useAuth } from "../providers";
-import { useMqtt } from "../providers/MqttProvider";
+import { AuthButton, useAuth, useMqtt } from "../providers";
 
 export default function Page() {
   const navigate = useNavigate();

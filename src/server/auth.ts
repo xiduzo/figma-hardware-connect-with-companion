@@ -50,12 +50,12 @@ export const authOptions: NextAuthOptions = {
         },
       };
     },
-    signIn: async ({ account }) => {
+    signIn: async ({ user }) => {
       const cookieJar = cookies();
       const figmaWriteKey = cookieJar.get("figma-write-key");
-      if (figmaWriteKey && account?.userId) {
+      if (figmaWriteKey && user.id) {
         await authCaller.setReadWriteAuthToken({
-          userId: account.userId,
+          userId: user.id,
           write: figmaWriteKey.value,
         });
       }

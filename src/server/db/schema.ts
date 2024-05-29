@@ -130,7 +130,7 @@ export const serialConnections = createTable(
   "serialConnectiserialConnectionson",
   {
     name: varchar("name").notNull(),
-    figmaVariableId: varchar("figmaVariableId").notNull(),
+    id: varchar("figmaVariableId").notNull(),
     resolvedType: customFigmaType("resolvedType").notNull(),
     userId: varchar("userId", { length: 255 })
       .notNull()
@@ -138,7 +138,7 @@ export const serialConnections = createTable(
   },
   (serialConnections) => ({
     compoundKey: primaryKey({
-      columns: [serialConnections.figmaVariableId, serialConnections.userId],
+      columns: [serialConnections.id, serialConnections.userId],
     }),
   }),
 );

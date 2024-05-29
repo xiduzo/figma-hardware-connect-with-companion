@@ -3,10 +3,10 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { accounts, authReadWriteKeys } from "~/server/db/schema";
 import {
-    createCallerFactory,
-    createTRPCRouter,
-    protectedProcedure,
-    publicProcedure,
+  createCallerFactory,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
 } from "../trpc";
 
 export const authRouter = createTRPCRouter({
@@ -41,7 +41,7 @@ export const authRouter = createTRPCRouter({
           .where(eq(authReadWriteKeys.read, input));
 
         const tokens = await transaction.query.accounts.findFirst({
-          where: eq(accounts.providerAccountId, userId),
+          where: eq(accounts.userId, userId),
         });
 
         return {
