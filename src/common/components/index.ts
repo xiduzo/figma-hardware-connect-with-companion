@@ -10,5 +10,6 @@ export * from "./Label";
 export * from "./Select";
 export * from "./Text";
 export * from "./Title";
+export * from "./TypeIcon";
 
 export * from "./form";

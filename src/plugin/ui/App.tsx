@@ -1,15 +1,16 @@
 import React from "react";
 
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
-import { TRPCReactProvider, type RouterOutputs } from "../../trpc/react";
+import { TRPCReactProvider, api, type RouterOutputs } from "../../trpc/react";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import "./index.css";
-import { AuthProvider } from "./providers/AuthProvider";
+import { AuthProvider, useAuth } from "./providers/AuthProvider";
 import { MqttProvider } from "./providers/MqttProvider";
-import { LOCAL_STORAGE_KEYS } from "./types";
+import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE } from "./types";
 
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
+import { useMessageListener } from "./hooks";
 import Home from "./routes";
 import Account from "./routes/account";
 import MqttConnections from "./routes/mqtt/connections";
@@ -32,10 +33,39 @@ export default function App() {
   return (
     <TRPCReactProvider source="figma-ui" accessToken={localTokens?.accessToken}>
       <AuthProvider>
+        <AuthenticatedBackgroundStuff />
         <MqttProvider>
           <RouterProvider router={router} />
         </MqttProvider>
       </AuthProvider>
     </TRPCReactProvider>
   );
+}
+
+function AuthenticatedBackgroundStuff() {
+  const { user } = useAuth();
+
+  if (!user) return null;
+  return (
+    <>
+      <UpdateFigmaVariablesInDatabase />
+    </>
+  );
+}
+
+function UpdateFigmaVariablesInDatabase() {
+  const { mutateAsync } = api.figma.update.useMutation();
+
+  async function onMessage(variables: Variable[] | undefined) {
+    if (!variables) return;
+
+    await mutateAsync(variables);
+  }
+
+  useMessageListener<Variable[] | undefined>(
+    MESSAGE_TYPE.GET_LOCAL_VARIABLES,
+    onMessage,
+    { intervalInMs: 5000, shouldSendInitialMessage: true },
+  );
+  return null;
 }

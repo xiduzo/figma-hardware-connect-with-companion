@@ -53,9 +53,9 @@ export const authOptions: NextAuthOptions = {
     signIn: async ({ account }) => {
       const cookieJar = cookies();
       const figmaWriteKey = cookieJar.get("figma-write-key");
-      if (figmaWriteKey && account?.providerAccountId) {
+      if (figmaWriteKey && account?.userId) {
         await authCaller.setReadWriteAuthToken({
-          accountId: account.providerAccountId,
+          userId: account.userId,
           write: figmaWriteKey.value,
         });
       }

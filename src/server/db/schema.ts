@@ -1,10 +1,10 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  customType,
   index,
   integer,
   pgTableCreator,
   primaryKey,
-  serial,
   text,
   timestamp,
   uuid,
@@ -20,25 +20,6 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator(
   (name) => `figma-mqtt-serious_${name}`,
-);
-
-export const posts = createTable(
-  "post",
-  {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("createdById", { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true }),
-  },
-  (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
-  }),
 );
 
 export const users = createTable("user", {
@@ -127,16 +108,37 @@ export const verificationTokens = createTable(
   }),
 );
 
-export const authReadWriteKeys = createTable(
-  "authReadWriteKeys",
-  {
-    read: uuid("read").defaultRandom().notNull(),
-    write: uuid("write").defaultRandom().notNull(),
-    accountId: varchar("accountId", { length: 255 }).references(
-      () => accounts.providerAccountId,
-    ),
+export const authReadWriteKeys = createTable("authReadWriteKeys", {
+  read: uuid("read").defaultRandom().notNull(),
+  write: uuid("write").defaultRandom().notNull(),
+  userId: varchar("userId", { length: 255 }).references(() => users.id),
+});
+
+const customFigmaType = customType<{ data: VariableResolvedDataType }>({
+  dataType() {
+    return "text";
   },
-  (authReadWriteKeys) => ({
-    compoundKey: primaryKey({ columns: [authReadWriteKeys.read] }),
+  toDriver(value) {
+    return value;
+  },
+  fromDriver(value) {
+    return value as VariableResolvedDataType;
+  },
+});
+
+export const serialConnections = createTable(
+  "serialConnectiserialConnectionson",
+  {
+    name: varchar("name").notNull(),
+    figmaVariableId: varchar("figmaVariableId").notNull(),
+    resolvedType: customFigmaType("resolvedType").notNull(),
+    userId: varchar("userId", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (serialConnections) => ({
+    compoundKey: primaryKey({
+      columns: [serialConnections.figmaVariableId, serialConnections.userId],
+    }),
   }),
 );

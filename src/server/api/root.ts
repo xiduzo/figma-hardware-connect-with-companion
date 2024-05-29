@@ -1,5 +1,5 @@
 import { authRouter } from "~/server/api/routers/auth";
-import { postRouter } from "~/server/api/routers/post";
+import { figmaRouter } from "~/server/api/routers/figma";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,8 +8,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
   auth: authRouter,
+  figma: figmaRouter,
 });
 
 // export type definition of API

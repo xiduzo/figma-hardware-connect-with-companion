@@ -3,10 +3,10 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { accounts, authReadWriteKeys } from "~/server/db/schema";
 import {
-  createCallerFactory,
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
+    createCallerFactory,
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
 } from "../trpc";
 
 export const authRouter = createTRPCRouter({
@@ -30,32 +30,33 @@ export const authRouter = createTRPCRouter({
         where: eq(authReadWriteKeys.read, input),
       });
 
-      if (readWriteKeys?.accountId) {
-        return ctx.db.transaction(async (transaction) => {
-          await transaction
-            .delete(authReadWriteKeys)
-            .where(eq(authReadWriteKeys.read, input));
+      return ctx.db.transaction(async (transaction) => {
+        const userId = readWriteKeys?.userId;
+        if (!userId) {
+          return undefined;
+        }
 
-          const tokens = await transaction.query.accounts.findFirst({
-            where: eq(accounts.providerAccountId, readWriteKeys.accountId!),
-          });
+        await transaction
+          .delete(authReadWriteKeys)
+          .where(eq(authReadWriteKeys.read, input));
 
-          return {
-            accessToken: tokens?.access_token,
-            refreshToken: tokens?.refresh_token,
-            expiresAt: tokens?.expires_at,
-          };
+        const tokens = await transaction.query.accounts.findFirst({
+          where: eq(accounts.providerAccountId, userId),
         });
-      }
 
-      return undefined;
+        return {
+          accessToken: tokens?.access_token,
+          refreshToken: tokens?.refresh_token,
+          expiresAt: tokens?.expires_at,
+        };
+      });
     }),
   // TODO: make this a serverProtectedProcedure
   setReadWriteAuthToken: publicProcedure
     .input(
       z.object({
         write: z.string(),
-        accountId: z.string(),
+        userId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
