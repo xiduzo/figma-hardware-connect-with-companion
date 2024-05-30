@@ -12,7 +12,7 @@ import { useMqttClient } from "~/common/hooks";
 export function SerialPortComponent({ userId }: { userId: string }) {
   const [port, setPort] = useState<SerialPort | null>(null);
 
-  const { connect, publish } = useMqttClient(console.log);
+  const { connect, publish } = useMqttClient();
 
   useEffect(() => {
     connect();

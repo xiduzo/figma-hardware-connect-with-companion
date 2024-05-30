@@ -20,12 +20,14 @@ import Account from "./routes/account";
 import MqttSettings from "./routes/mqtt/settings";
 import SerialInfo from "./routes/serial/info";
 import FigmaVariables from "./routes/variables";
+import FigmaVariablesSettings from "./routes/variables/settings";
 
 const router = createMemoryRouter([
   { path: "/", Component: Home },
   { path: "/account", Component: Account },
   { path: "/mqtt/settings", Component: MqttSettings },
   { path: "/variables", Component: FigmaVariables },
+  { path: "/variables/settings", Component: FigmaVariablesSettings },
   { path: "/serial/info", Component: SerialInfo },
 ]);
 

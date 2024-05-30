@@ -45,7 +45,7 @@ export default function Page() {
 
 function MqttSection() {
   const navigate = useNavigate();
-  const { isConnected, disconnect } = useMqtt();
+  const { isConnected } = useMqtt();
 
   return (
     <section className="flex items-center justify-between">
@@ -53,9 +53,6 @@ function MqttSection() {
         <Title as="h2">Mqtt</Title>
       </ConnectionIndicator>
       <ButtonGroup>
-        {isConnected && (
-          <IconButton icon="SignalSlashIcon" onClick={() => disconnect()} />
-        )}
         <IconButton icon="CogIcon" onClick={() => navigate("/mqtt/settings")} />
       </ButtonGroup>
     </section>

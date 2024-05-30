@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import { createContext, useContext, type PropsWithChildren } from "react";
 import { z } from "zod";
-import { useMqttClient, useVariableId } from "../hooks";
+import { useMqttClient, useUid } from "../hooks";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useMessageListener } from "../hooks/useMessageListener";
 import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE, SetLocalValiable } from "../types";
@@ -21,17 +21,17 @@ export type MqttConnection = z.infer<typeof mqttConnection>;
 const FigmaMqttContext = createContext({
   isConnected: false,
   connect: (options: MqttConnection): Promise<void> => {
-    console.log("MqttProvider not found", { options });
-    throw new Error("MqttProvider not found");
+    throw new Error("MqttProvider not found", {
+      cause: JSON.stringify(options),
+    });
   },
   disconnect: (): void => {
-    console.log("MqttProvider not found");
     throw new Error("MqttProvider not found");
   },
 });
 
 export function FigmaMqttProvider({ children }: PropsWithChildren) {
-  const { createTopic } = useVariableId();
+  const { createTopic } = useUid();
 
   const [mqttConnection, setMqttConnection] = useLocalStorage<MqttConnection>(
     LOCAL_STORAGE_KEYS.MQTT_CONNECTION,
@@ -47,8 +47,9 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
   } = useMqttClient();
 
   function handleDisconnect() {
-    disconnect();
-    void setMqttConnection((prev) => prev && { ...prev, autoConnect: false });
+    void setMqttConnection(
+      (prev) => prev && { ...prev, autoConnect: false },
+    ).then(disconnect);
   }
 
   async function handleConnect(options: MqttConnection) {

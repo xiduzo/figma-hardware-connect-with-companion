@@ -62,7 +62,6 @@ export function useLocalStorage<T>(
     (payload) => {
       if (payload?.key !== key) return;
       const [resolve] = localStatePromise.current;
-      console.log({ resolve });
       resolve?.();
 
       setState(payload?.value);

@@ -2,8 +2,8 @@ import { useLocalStorage } from "../hooks";
 import { LOCAL_STORAGE_KEYS } from "../types";
 import { cuid } from "../utils/cuid";
 
-export function useVariableId() {
-  const [uid] = useLocalStorage(LOCAL_STORAGE_KEYS.TOPIC_UID, {
+export function useUid() {
+  const [uid, setUid] = useLocalStorage(LOCAL_STORAGE_KEYS.TOPIC_UID, {
     initialValue: cuid(),
   });
 
@@ -11,5 +11,9 @@ export function useVariableId() {
     return `fhc/${uid ?? cuid()}/${id}`;
   }
 
-  return { createTopic };
+  function generateUid() {
+    return cuid();
+  }
+
+  return { createTopic, generateUid, uid, setUid };
 }

@@ -9,25 +9,21 @@ import {
   type SubmitErrorHandler,
   type UseFormProps,
 } from "react-hook-form";
-import type { ZodType, ZodTypeDef, z } from "zod";
+import type { Schema, z } from "zod";
 
-export function ZodFormProvider({
-  schema,
-  onValid,
-  onInvalid,
-  children,
-  ...useFormProps
-}: Props) {
+export function ZodFormProvider<
+  S extends z.Schema,
+  F extends FieldValues = FieldValues,
+>({ schema, onValid, onInvalid, children, ...useFormProps }: Props<S, F>) {
   const formMethods = useForm({
-    resolver: zodResolver(schema),
-    reValidateMode: "onChange",
     ...useFormProps,
+    resolver: zodResolver<S>(schema),
   });
 
   useEffect(() => {
     if (!useFormProps.defaultValues) return;
 
-    formMethods.reset(useFormProps.defaultValues as FieldValues);
+    formMethods.reset(useFormProps.defaultValues);
   }, [formMethods, useFormProps.defaultValues]);
 
   return (
@@ -42,14 +38,8 @@ export function ZodFormProvider({
   );
 }
 
-// TODO: this typing should be improved
-// to do actual typing support you know...
-type Props<
-  Output extends FieldValues = Record<string, unknown>,
-  Schema extends ZodType<Output, ZodTypeDef> = ZodType<Output, ZodTypeDef>,
-> = PropsWithChildren & {
-  schema: Schema;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onValid: (data: any) => void | Promise<void>;
-  onInvalid: SubmitErrorHandler<Output>;
-} & Omit<UseFormProps<z.infer<Schema>>, "resolver">;
+type Props<S extends Schema, Values extends FieldValues> = PropsWithChildren & {
+  schema: S;
+  onValid: (data: z.output<S>) => void | Promise<void>;
+  onInvalid: SubmitErrorHandler<Values>;
+} & Omit<UseFormProps<z.infer<S>>, "resolver">;

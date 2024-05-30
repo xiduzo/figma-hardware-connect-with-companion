@@ -14,6 +14,9 @@ export function useMqttClient() {
   }
 
   function subscribe(topic: string, callback: mqtt.OnMessageCallback) {
+    if (subscriptions.current.get(topic)) return;
+
+    console.log("Subscribing to", topic);
     subscriptions.current.set(topic, callback);
     client.current?.subscribeAsync(topic).catch(console.error);
 
@@ -51,14 +54,19 @@ export function useMqttClient() {
       })
       .on("error", disconnect)
       .on("disconnect", disconnect)
+      .on("close", () => {
+        setIsConnected(false);
+      })
       .on("reconnect", () => {
         for (const [topic, callback] of subscriptions.current) {
-          subscribe(topic, callback);
+          unsubscribe(topic)
+            .then(() => subscribe(topic, callback))
+            .catch(console.error);
         }
+        setIsConnected(true);
       })
       .on("message", (topic, message, packet) => {
-        const callback = subscriptions.current.get(topic);
-        callback?.(topic, message, packet);
+        subscriptions.current.get(topic)?.(topic, message, packet);
       });
 
     return () => disconnect();
