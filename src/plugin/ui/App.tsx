@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import { TRPCReactProvider, api, type RouterOutputs } from "../../trpc/react";
@@ -64,15 +64,18 @@ function AuthenticatedBackgroundStuff() {
 function UpdateFigmaVariablesInDatabase() {
   const { mutateAsync } = api.figma.sync.useMutation();
 
-  async function onMessage(variables: Variable[] | undefined) {
-    if (!variables) return;
+  const handler = useCallback(
+    async (variables: Variable[] | undefined) => {
+      if (!variables) return;
 
-    await mutateAsync(variables);
-  }
+      await mutateAsync(variables);
+    },
+    [mutateAsync],
+  );
 
   useMessageListener<Variable[] | undefined>(
     MESSAGE_TYPE.GET_LOCAL_VARIABLES,
-    onMessage,
+    handler,
     { intervalInMs: 10000, shouldSendInitialMessage: true },
   );
   return null;
