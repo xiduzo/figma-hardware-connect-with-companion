@@ -17,9 +17,7 @@ type Tokens = RouterOutputs["auth"]["getAccessToken"];
 import { useMessageListener } from "./hooks";
 import Home from "./routes";
 import Account from "./routes/account";
-import MqttConnections from "./routes/mqtt/connections";
 import MqttSettings from "./routes/mqtt/settings";
-import SerialConnections from "./routes/serial/connections";
 import SerialInfo from "./routes/serial/info";
 import FigmaVariables from "./routes/variables";
 
@@ -28,8 +26,6 @@ const router = createMemoryRouter([
   { path: "/account", Component: Account },
   { path: "/mqtt/settings", Component: MqttSettings },
   { path: "/variables", Component: FigmaVariables },
-  { path: "/mqtt/connections", Component: MqttConnections },
-  { path: "/serial/connections", Component: SerialConnections },
   { path: "/serial/info", Component: SerialInfo },
 ]);
 
