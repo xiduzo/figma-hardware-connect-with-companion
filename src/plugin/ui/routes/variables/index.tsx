@@ -34,7 +34,7 @@ export default function Page() {
 
   return (
     <>
-      <Header title="Mqtt connections"></Header>
+      <Header title="Figma variables"></Header>
       <main className="max-h-80 divide-y divide-zinc-300 dark:divide-zinc-700">
         {!variables?.length && (
           <section className="flex h-96 flex-col items-center justify-center text-center">

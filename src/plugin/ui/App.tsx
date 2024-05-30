@@ -21,11 +21,13 @@ import MqttConnections from "./routes/mqtt/connections";
 import MqttSettings from "./routes/mqtt/settings";
 import SerialConnections from "./routes/serial/connections";
 import SerialInfo from "./routes/serial/info";
+import FigmaVariables from "./routes/variables";
 
 const router = createMemoryRouter([
   { path: "/", Component: Home },
   { path: "/account", Component: Account },
   { path: "/mqtt/settings", Component: MqttSettings },
+  { path: "/variables", Component: FigmaVariables },
   { path: "/mqtt/connections", Component: MqttConnections },
   { path: "/serial/connections", Component: SerialConnections },
   { path: "/serial/info", Component: SerialInfo },
@@ -38,10 +40,11 @@ export default function App() {
     <TRPCReactProvider source="figma-ui" accessToken={localTokens?.accessToken}>
       <AuthProvider>
         <AuthenticatedBackgroundStuff />
-        <InternalMqttProvider />
-        <FigmaMqttProvider>
-          <RouterProvider router={router} />
-        </FigmaMqttProvider>
+        <InternalMqttProvider>
+          <FigmaMqttProvider>
+            <RouterProvider router={router} />
+          </FigmaMqttProvider>
+        </InternalMqttProvider>
       </AuthProvider>
     </TRPCReactProvider>
   );

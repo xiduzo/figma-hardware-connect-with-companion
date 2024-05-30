@@ -1,8 +1,11 @@
 import React from "react";
 import { Header, Text } from "../../../components";
+import { useSetWindowSize } from "../../../hooks";
 import { AuthButton } from "../../../providers";
 
 export default function Page() {
+  useSetWindowSize({ width: 250, height: 320 });
+
   function gotoCompanionApp() {
     window.open("http://localhost:3000", "_blank");
   }
@@ -21,7 +24,7 @@ export default function Page() {
           </span>
           , we can send serial data to this plugin!
         </Text>
-        <AuthButton signInText="Sign in to enable" />
+        <AuthButton signInText="Sign in to enable serial" />
       </main>
     </>
   );

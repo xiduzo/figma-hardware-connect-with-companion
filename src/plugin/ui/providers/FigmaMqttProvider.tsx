@@ -1,20 +1,12 @@
 import React, { useEffect } from "react";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useRef,
-  type PropsWithChildren,
-} from "react";
+import { createContext, useContext, type PropsWithChildren } from "react";
 import { z } from "zod";
 import { useMqttClient, useVariableId } from "../hooks";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useMessageListener } from "../hooks/useMessageListener";
 import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE, SetLocalValiable } from "../types";
 import { sendMessageToFigma } from "../utils/sendMessageToFigma";
-
-type Callback<T> = (message: T) => void;
 
 export const mqttConnection = z.object({
   host: z.string().min(1),
@@ -45,34 +37,18 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
     LOCAL_STORAGE_KEYS.MQTT_CONNECTION,
   );
 
-  const mqttCallback = (topic: string, message: Buffer) => {
-    const callback = subscriptions.current.get(topic);
-    console.log("recieved message", { topic, message, callback });
-    if (!callback) return;
+  const {
+    connect,
+    isConnected,
+    disconnect,
+    subscribe,
+    unsubscribe,
+    subscriptions,
+  } = useMqttClient();
 
-    try {
-      callback(message);
-    } catch (error) {
-      console.error("Nothing we can do", error);
-    }
-  };
-
-  const { connect, isConnected, disconnect, subscribe, unsubscribe } =
-    useMqttClient(mqttCallback);
-
-  const subscriptions = useRef<Map<string, Callback<Buffer>>>(new Map());
-
-  const handleDisconnect = useCallback(() => {
+  function handleDisconnect() {
     disconnect();
     void setMqttConnection((prev) => prev && { ...prev, autoConnect: false });
-  }, [setMqttConnection, disconnect]);
-
-  function handleMessage(variable: Variable) {
-    function handleValue(value: Buffer) {
-      sendMessageToFigma(SetLocalValiable(variable.id, value.toString()));
-    }
-
-    return handleValue;
   }
 
   async function handleConnect(options: MqttConnection) {
@@ -81,24 +57,21 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
   }
 
   async function updateSubscriptions(variables: Variable[] | undefined) {
-    const subscribedTopics = subscriptions.current.keys();
     const topics = variables?.map(({ id }) => createTopic(id)) ?? [];
 
     // Clear subscriptions that are no longer needed
-    for (const subscribedTopic of subscribedTopics) {
+    for (const [subscribedTopic] of subscriptions.current) {
       if (!topics.includes(subscribedTopic)) {
         await unsubscribe(subscribedTopic);
-        subscriptions.current.delete(subscribedTopic);
       }
     }
 
     // Add new subscriptions
     for (const variable of variables ?? []) {
       const topic = createTopic(variable.id);
-      if (!subscriptions.current.has(topic)) {
-        subscribe(topic);
-        subscriptions.current.set(topic, handleMessage(variable));
-      }
+      subscribe(topic, (_: string, payload: Buffer) => {
+        sendMessageToFigma(SetLocalValiable(variable.id, payload.toString()));
+      });
     }
   }
 
