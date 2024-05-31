@@ -79,10 +79,7 @@ function SerialSection() {
             icon="ArrowTopRightOnSquareIcon"
             onClick={gotoCompanionApp}
           />
-          <IconButton
-            icon="QuestionMarkCircleIcon"
-            onClick={() => navigate("/serial/info")}
-          />
+          <IconButton icon="CogIcon" onClick={() => navigate("/serial/info")} />
         </ButtonGroup>
       </section>
     </section>

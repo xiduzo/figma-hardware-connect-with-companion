@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useInterval } from "usehooks-ts";
 import { type MESSAGE_TYPE, type PluginMessage } from "../types";
-import { sendMessageToFigma } from "../utils/sendMessageToFigma";
+import { sendMessageToFigma } from "../utils";
 
 export function useMessageListener<T>(
   type: MESSAGE_TYPE,

@@ -41,7 +41,15 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => {
+    session: async ({ session, user }) => {
+      const cookieJar = cookies();
+      const figmaWriteKey = cookieJar.get("figma-write-key");
+      if (figmaWriteKey) {
+        await authCaller.setReadWriteUserId({
+          userId: user.id,
+          write: figmaWriteKey.value,
+        });
+      }
       return {
         ...session,
         user: {
@@ -49,17 +57,6 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
         },
       };
-    },
-    signIn: async ({ user }) => {
-      const cookieJar = cookies();
-      const figmaWriteKey = cookieJar.get("figma-write-key");
-      if (figmaWriteKey && user.id) {
-        await authCaller.setReadWriteAuthToken({
-          userId: user.id,
-          write: figmaWriteKey.value,
-        });
-      }
-      return true;
     },
   },
   adapter: DrizzleAdapter(db, createTable) as Adapter,

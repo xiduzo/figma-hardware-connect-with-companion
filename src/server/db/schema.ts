@@ -108,11 +108,19 @@ export const verificationTokens = createTable(
   }),
 );
 
-export const authReadWriteKeys = createTable("authReadWriteKeys", {
-  read: uuid("read").defaultRandom().notNull(),
-  write: uuid("write").defaultRandom().notNull(),
-  userId: varchar("userId", { length: 255 }).references(() => users.id),
-});
+export const authReadWriteKeys = createTable(
+  "authReadWriteKeys",
+  {
+    read: uuid("read").defaultRandom().notNull(),
+    write: uuid("write").defaultRandom().notNull(),
+    userId: varchar("userId", { length: 255 }).references(() => users.id),
+  },
+  (authReadWriteKeys) => ({
+    compoundKey: primaryKey({
+      columns: [authReadWriteKeys.read, authReadWriteKeys.write],
+    }),
+  }),
+);
 
 const customFigmaType = customType<{ data: VariableResolvedDataType }>({
   dataType() {
@@ -127,11 +135,12 @@ const customFigmaType = customType<{ data: VariableResolvedDataType }>({
 });
 
 export const serialConnections = createTable(
-  "serialConnectiserialConnectionson",
+  "serialConnections",
   {
     name: varchar("name").notNull(),
     id: varchar("figmaVariableId").notNull(),
     resolvedType: customFigmaType("resolvedType").notNull(),
+    uid: varchar("uid", { length: 40 }).notNull(),
     userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),

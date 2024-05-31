@@ -1,3 +1,4 @@
+import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Label } from "../Label";
 import { Select, type SelectProps } from "../Select";
@@ -11,7 +12,7 @@ export function FormSelect({ name, label, ...inputProps }: Props) {
   return (
     <Label className="flex flex-col space-y-0.5">
       <Text dimmed>{label ?? name}</Text>
-      {error && <Text className="text-red-500 dark:text-red-500">{error}</Text>}
+      {error && <Text isError>{error}</Text>}
       <Controller
         name={name}
         control={control}

@@ -13,6 +13,10 @@ const handler = async (req: NextRequest, res: NextResponse) => {
     cookieJar.set("figma-write-key", figmaWriteKey);
   }
 
+  if (req.nextUrl.pathname.includes("/api/auth/callback") && figmaWriteKey) {
+    cookieJar.delete("figma-write-key");
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
   return NextAuth(authOptions)(req, res);
 };

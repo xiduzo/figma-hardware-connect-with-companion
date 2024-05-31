@@ -14,6 +14,7 @@ type AuthContext = {
     email?: string | null;
     image?: string | null;
     name?: string | null;
+    uid?: string | null;
   };
 };
 
@@ -40,10 +41,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     reset: clearReadWriteKeys,
   } = trpc.auth.createReadWriteKeys.useMutation();
 
-  const { data: user } = trpc.auth.me.useQuery(undefined, {
-    enabled: !!localTokens?.accessToken,
-    retry: false,
-  });
+  const { data: user, refetch: refetchUser } = trpc.auth.me.useQuery(
+    undefined,
+    {
+      enabled: !!localTokens?.accessToken,
+      retry: false,
+    },
+  );
 
   const { data: tokens, status: getAccessTokenStatus } =
     trpc.auth.getAccessToken.useQuery(readWriteKeys?.read ?? "", {
@@ -77,16 +81,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!tokens?.accessToken) return;
     clearReadWriteKeys(); // prevent re-fetching tokens
     void setLocalTokens(tokens);
-  }, [tokens, setLocalTokens, clearReadWriteKeys]);
+    void refetchUser();
+  }, [tokens, setLocalTokens, clearReadWriteKeys, refetchUser]);
 
   return (
     <AuthContext.Provider
       value={{
         signIn,
         signOut,
+        user,
         isAuthenticating:
           readWriteKeys !== undefined && getAccessTokenStatus !== "success",
-        user: user?.user,
       }}
     >
       {children}

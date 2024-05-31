@@ -11,7 +11,7 @@ import {
 
 export const authRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.session;
+    return ctx.session.user;
   }),
   refreshToken: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     console.log("refresh token", { ctx, input });
@@ -52,7 +52,7 @@ export const authRouter = createTRPCRouter({
       });
     }),
   // TODO: make this a serverProtectedProcedure
-  setReadWriteAuthToken: publicProcedure
+  setReadWriteUserId: publicProcedure
     .input(
       z.object({
         write: z.string(),
@@ -62,7 +62,9 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(authReadWriteKeys)
-        .set(input)
+        .set({
+          userId: input.userId,
+        })
         .where(eq(authReadWriteKeys.write, input.write));
     }),
 });

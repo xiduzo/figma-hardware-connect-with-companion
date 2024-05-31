@@ -5,6 +5,9 @@ export enum MESSAGE_TYPE {
   GET_LOCAL_VARIABLES = "GET_LOCAL_VARIABLES",
   SET_LOCAL_VARIABLE = "SET_LOCAL_VARIABLE",
   SHOW_TOAST = "SHOW_TOAST",
+  CREATE_VARIABLE = "CREATE_VARIABLE",
+  DELETE_VARIABLE = "DELETE_VARIABLE",
+  UPDATE_VARIABLE = "UPDATE_VARIABLE",
 }
 
 export enum LOCAL_STORAGE_KEYS {
@@ -101,12 +104,52 @@ export function ShowToast(
   };
 }
 
+type VariableMessage = Pick<Variable, "id" | "name" | "resolvedType">;
+
+type CreateVariableMessage = {
+  type: MESSAGE_TYPE.CREATE_VARIABLE;
+  payload: Omit<VariableMessage, "id">;
+};
+
+export function CreateVariable(
+  payload: Omit<VariableMessage, "id">,
+): CreateVariableMessage {
+  return {
+    type: MESSAGE_TYPE.CREATE_VARIABLE,
+    payload,
+  };
+}
+
+type DeleteVariableMessage = {
+  type: MESSAGE_TYPE.DELETE_VARIABLE;
+  payload: string;
+};
+export function DeleteVariable(payload: string): DeleteVariableMessage {
+  return {
+    type: MESSAGE_TYPE.DELETE_VARIABLE,
+    payload,
+  };
+}
+
+type UpdateVariableMessage = {
+  type: MESSAGE_TYPE.UPDATE_VARIABLE;
+  payload: Omit<VariableMessage, "resolvedType">;
+};
+export function UpdateVariable(payload: Omit<VariableMessage, "resolvedType">) {
+  return {
+    type: MESSAGE_TYPE.UPDATE_VARIABLE,
+    payload,
+  };
+}
 export type Message<T> =
   | GetSetLocalStateValueMessage<T>
   | SetUiOptionsMessage
   | GetLocalVariablesMessage
   | SetLocalVariableMessage<T>
-  | ShowToastMessage;
+  | ShowToastMessage
+  | CreateVariableMessage
+  | DeleteVariableMessage
+  | UpdateVariableMessage;
 
 export type PluginMessage<T> = {
   pluginMessage: { type: MESSAGE_TYPE; payload?: T };

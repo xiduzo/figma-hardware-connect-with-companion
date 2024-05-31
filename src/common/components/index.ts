@@ -11,5 +11,6 @@ export * from "./Select";
 export * from "./Text";
 export * from "./Title";
 export * from "./TypeIcon";
+export * from "./TypeLabel";
 
 export * from "./form";

@@ -1,3 +1,4 @@
+/** eslint-disable @typescript-eslint/no-unsafe-call */
 import React, {
   createContext,
   useContext,
@@ -6,7 +7,7 @@ import React, {
 } from "react";
 import { useMqttClient } from "../hooks";
 import { SetLocalValiable } from "../types";
-import { sendMessageToFigma } from "../utils/sendMessageToFigma";
+import { sendMessageToFigma } from "../utils";
 import { useAuth } from "./AuthProvider";
 
 const InternalMqttContext = createContext({
@@ -33,6 +34,7 @@ export function InternalMqttProvider({ children }: PropsWithChildren) {
         message: message.toString(),
       });
       if (variable && variable.toLowerCase().startsWith("variableid")) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         sendMessageToFigma(SetLocalValiable(variable, message.toString()));
       }
     });

@@ -20,10 +20,21 @@ export const figmaRouter = createTRPCRouter({
           name: z.string(),
           id: z.string(),
           resolvedType: VariableResolvedDataTypeSchema,
+          uid: z
+            .string()
+            .max(40)
+            .regex(/^[a-zA-Z-]+$/, {
+              message: "Must be alphanumeric or hyphenated",
+            }),
         }),
       ),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!input.length) {
+        return ctx.db
+          .delete(serialConnections)
+          .where(eq(serialConnections.userId, ctx.session.user.id));
+      }
       return ctx.db.transaction(async (transaction) => {
         await transaction.delete(serialConnections).where(
           and(
@@ -47,6 +58,7 @@ export const figmaRouter = createTRPCRouter({
             target: [serialConnections.id, serialConnections.userId],
             set: {
               name: sql`excluded.name`,
+              uid: sql`excluded.uid`,
             },
           });
       });

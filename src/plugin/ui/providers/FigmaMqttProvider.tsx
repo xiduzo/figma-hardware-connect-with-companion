@@ -1,3 +1,7 @@
+/** eslint-disable @typescript-eslint/no-unsafe-call */
+/** eslint-disable @typescript-eslint/no-unsafe-return */
+/** eslint-disable @typescript-eslint/no-unsafe-member-access */
+/** eslint-disable @typescript-eslint/no-unsafe-argument */
 import React, { useEffect } from "react";
 
 import { createContext, useContext, type PropsWithChildren } from "react";
@@ -6,7 +10,7 @@ import { useMqttClient, useUid } from "../hooks";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useMessageListener } from "../hooks/useMessageListener";
 import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE, SetLocalValiable } from "../types";
-import { sendMessageToFigma } from "../utils/sendMessageToFigma";
+import { sendMessageToFigma } from "../utils";
 
 export const mqttConnection = z.object({
   host: z.string().min(1),
@@ -48,6 +52,7 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
 
   function handleDisconnect() {
     void setMqttConnection(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       (prev) => prev && { ...prev, autoConnect: false },
     ).then(disconnect);
   }
@@ -70,7 +75,9 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
     // Add new subscriptions
     for (const variable of variables ?? []) {
       const topic = createTopic(variable.id);
+      if (!topic) return;
       subscribe(topic, (_: string, payload: Buffer) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         sendMessageToFigma(SetLocalValiable(variable.id, payload.toString()));
       });
     }
@@ -91,8 +98,10 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
   }, [isConnected, getLocalVariables]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!mqttConnection?.autoConnect) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     void connect(mqttConnection);
   }, [mqttConnection, connect]);
 

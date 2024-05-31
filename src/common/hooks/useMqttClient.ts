@@ -26,6 +26,7 @@ export function useMqttClient() {
   }
 
   async function unsubscribe(topic: string) {
+    console.log("Unsubscribing from", topic);
     subscriptions.current.delete(topic);
     return client.current?.unsubscribeAsync(topic);
   }

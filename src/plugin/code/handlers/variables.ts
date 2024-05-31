@@ -1,5 +1,25 @@
 import { FIGMA_MQTT_COLLECTION_NAME } from "../constants";
-import { GetLocalVariables } from "../types";
+import { CreateVariable, DeleteVariable, GetLocalVariables } from "../types";
+
+export async function deleteVariable(id: string) {
+  const variable = await figma.variables.getVariableByIdAsync(id);
+
+  if (variable) {
+    variable.remove();
+  }
+
+  figma.ui.postMessage(DeleteVariable(id));
+}
+
+export async function createVariable(
+  name: string,
+  resolvedType: VariableResolvedDataType,
+) {
+  const collection = await getCollection();
+
+  figma.variables.createVariable(name, collection, resolvedType);
+  figma.ui.postMessage(CreateVariable({ name, resolvedType }));
+}
 
 export async function getLocalVariables() {
   const collection = await getCollection();

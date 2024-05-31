@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   GetLocalStateValue,
@@ -5,7 +6,7 @@ import {
   SetLocalStateValue,
   type LOCAL_STORAGE_KEYS,
 } from "../types";
-import { sendMessageToFigma } from "../utils/sendMessageToFigma";
+import { sendMessageToFigma } from "../utils";
 import { useMessageListener } from "./useMessageListener";
 
 type Update<T> = T | ((prev?: T) => T | undefined);
@@ -44,6 +45,7 @@ export function useLocalStorage<T>(
   );
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sendMessageToFigma(GetLocalStateValue(key, options?.initialValue));
   }, [key, options?.initialValue]);
 

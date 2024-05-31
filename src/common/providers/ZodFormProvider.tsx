@@ -3,11 +3,11 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, type PropsWithChildren } from "react";
 import {
-  FormProvider,
-  useForm,
-  type FieldValues,
-  type SubmitErrorHandler,
-  type UseFormProps,
+    FormProvider,
+    useForm,
+    type FieldValues,
+    type SubmitErrorHandler,
+    type UseFormProps,
 } from "react-hook-form";
 import type { Schema, z } from "zod";
 
@@ -43,3 +43,6 @@ type Props<S extends Schema, Values extends FieldValues> = PropsWithChildren & {
   onValid: (data: z.output<S>) => void | Promise<void>;
   onInvalid: SubmitErrorHandler<Values>;
 } & Omit<UseFormProps<z.infer<S>>, "resolver">;
+
+export type { Props as ZodFormProviderProps };
+

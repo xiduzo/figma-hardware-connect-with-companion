@@ -14,20 +14,23 @@ import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE } from "./types";
 
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
-import { useMessageListener } from "./hooks";
+import { useMessageListener, useUid } from "./hooks";
 import Home from "./routes";
 import Account from "./routes/account";
 import MqttSettings from "./routes/mqtt/settings";
 import SerialInfo from "./routes/serial/info";
 import FigmaVariables from "./routes/variables";
+import NewFigmaVariable from "./routes/variables/new";
 import FigmaVariablesSettings from "./routes/variables/settings";
 
 const router = createMemoryRouter([
+  { path: "/", Component: FigmaVariables },
   { path: "/", Component: Home },
   { path: "/account", Component: Account },
   { path: "/mqtt/settings", Component: MqttSettings },
   { path: "/variables", Component: FigmaVariables },
   { path: "/variables/settings", Component: FigmaVariablesSettings },
+  { path: "/variables/new", Component: NewFigmaVariable },
   { path: "/serial/info", Component: SerialInfo },
 ]);
 
@@ -54,21 +57,23 @@ function AuthenticatedBackgroundStuff() {
   if (!user) return null;
   return (
     <>
-      <UpdateFigmaVariablesInDatabase />
+      <SyncVariables />
     </>
   );
 }
 
-function UpdateFigmaVariablesInDatabase() {
+function SyncVariables() {
   const { mutateAsync } = api.figma.sync.useMutation();
+  const { uid } = useUid();
 
   const handler = useCallback(
     async (variables: Variable[] | undefined) => {
       if (!variables) return;
+      if (!uid) return;
 
-      await mutateAsync(variables);
+      await mutateAsync(variables.map((variable) => ({ ...variable, uid })));
     },
-    [mutateAsync],
+    [mutateAsync, uid],
   );
 
   useMessageListener<Variable[] | undefined>(

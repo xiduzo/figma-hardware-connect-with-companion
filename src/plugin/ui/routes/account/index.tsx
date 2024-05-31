@@ -12,7 +12,7 @@ export default function Page() {
   return (
     <>
       <Header title="My Account">
-        <Text dimmed>{user?.name ?? "anonymous user"}</Text>
+        <Text dimmed>{user?.name ?? "anonymous"}</Text>
       </Header>
       <main>
         <AuthButton />
