@@ -1,1 +1,1 @@
-export const FIGMA_MQTT_COLLECTION_NAME = "Figma MQTT";
+export const FIGMA_HARDWARE_CONNECT_COLLECTION_NAME = "hardware connector";

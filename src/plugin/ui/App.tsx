@@ -24,7 +24,6 @@ import NewFigmaVariable from "./routes/variables/new";
 import FigmaVariablesSettings from "./routes/variables/settings";
 
 const router = createMemoryRouter([
-  { path: "/", Component: FigmaVariables },
   { path: "/", Component: Home },
   { path: "/account", Component: Account },
   { path: "/mqtt/settings", Component: MqttSettings },

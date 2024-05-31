@@ -1,4 +1,4 @@
-import { FIGMA_MQTT_COLLECTION_NAME } from "../constants";
+import { FIGMA_HARDWARE_CONNECT_COLLECTION_NAME } from "../constants";
 import { CreateVariable, DeleteVariable, GetLocalVariables } from "../types";
 
 export async function deleteVariable(id: string) {
@@ -228,10 +228,12 @@ function valueToFigmaValue(
 async function getCollection() {
   const collections = await figma.variables.getLocalVariableCollectionsAsync();
   const collection = collections.find(
-    ({ name }) => name === FIGMA_MQTT_COLLECTION_NAME,
+    ({ name }) => name === FIGMA_HARDWARE_CONNECT_COLLECTION_NAME,
   );
   if (!collection) {
-    return figma.variables.createVariableCollection(FIGMA_MQTT_COLLECTION_NAME);
+    return figma.variables.createVariableCollection(
+      FIGMA_HARDWARE_CONNECT_COLLECTION_NAME,
+    );
   }
   return collection;
 }
