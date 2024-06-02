@@ -1,11 +1,8 @@
-/** eslint-disable @typescript-eslint/no-unsafe-assignment */
-/** eslint-disable @typescript-eslint/no-unsafe-call */
-/** eslint-disable @typescript-eslint/no-unused-vars */
-/** eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { z } from "zod";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button, Fieldset, FormInput, Header } from "../../../components";
+
+import { MAX_UID_LENGTH } from "../../../constants";
 import { useSetWindowSize, useUid } from "../../../hooks";
 import { AuthButton, ZodFormProvider, useAuth } from "../../../providers";
 import { GetLocalVariables, ShowToast } from "../../../types";
@@ -14,12 +11,12 @@ import { sendMessageToFigma } from "../../../utils";
 const schema = z.object({
   uid: z
     .string()
-    .min(5)
-    .max(30)
+    .max(MAX_UID_LENGTH)
     .regex(/^[a-zA-Z-]+$/, {
       message: "Must be alphanumeric or hyphenated",
     }),
 });
+
 type FormValues = z.infer<typeof schema>;
 
 export default function Page() {
@@ -31,7 +28,6 @@ export default function Page() {
   async function handleFormSubmit(data: FormValues) {
     await setUid(data.uid);
     sendMessageToFigma(ShowToast("Updated your identifier!"));
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sendMessageToFigma(GetLocalVariables());
   }
 
@@ -43,7 +39,6 @@ export default function Page() {
           <ZodFormProvider
             schema={schema}
             disabled={!user}
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             defaultValues={{ uid }}
             onValid={handleFormSubmit}
             onInvalid={console.log}

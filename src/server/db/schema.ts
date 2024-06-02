@@ -11,6 +11,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { MAX_UID_LENGTH } from "~/common/constants";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -140,7 +141,7 @@ export const serialConnections = createTable(
     name: varchar("name").notNull(),
     id: varchar("figmaVariableId").notNull(),
     resolvedType: customFigmaType("resolvedType").notNull(),
-    uid: varchar("uid", { length: 40 }).notNull(),
+    uid: varchar("uid", { length: MAX_UID_LENGTH }).notNull(),
     userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),

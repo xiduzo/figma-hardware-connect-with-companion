@@ -1,34 +1,33 @@
 import { and, eq, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import { MAX_UID_LENGTH } from "~/common/constants";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { serialConnections } from "~/server/db/schema";
 
-const VariableResolvedDataType = [
+export const VariableResolvedDataTypes = [
   "BOOLEAN",
   "COLOR",
   "FLOAT",
   "STRING",
 ] as const satisfies VariableResolvedDataType[];
-const VariableResolvedDataTypeSchema = z.enum(VariableResolvedDataType);
+const VariableResolvedDataTypeSchema = z.enum(VariableResolvedDataTypes);
+
+export const variableSchema = z.object({
+  name: z.string(),
+  id: z.string(),
+  resolvedType: VariableResolvedDataTypeSchema,
+  uid: z
+    .string()
+    .max(MAX_UID_LENGTH)
+    .regex(/^[a-zA-Z-]+$/, {
+      message: "Must be alphanumeric or hyphenated",
+    }),
+});
 
 export const figmaRouter = createTRPCRouter({
   sync: protectedProcedure
-    .input(
-      z.array(
-        z.object({
-          name: z.string(),
-          id: z.string(),
-          resolvedType: VariableResolvedDataTypeSchema,
-          uid: z
-            .string()
-            .max(40)
-            .regex(/^[a-zA-Z-]+$/, {
-              message: "Must be alphanumeric or hyphenated",
-            }),
-        }),
-      ),
-    )
+    .input(z.array(variableSchema))
     .mutation(async ({ ctx, input }) => {
       if (!input.length) {
         return ctx.db
