@@ -4,6 +4,7 @@ export enum MESSAGE_TYPE {
   SET_UI_OPTIONS = "SET_UI_OPTIONS",
   GET_LOCAL_VARIABLES = "GET_LOCAL_VARIABLES",
   SET_LOCAL_VARIABLE = "SET_LOCAL_VARIABLE",
+  MQTT_GET_LOCAL_VARIABLES = "MQTT_GET_LOCAL_VARIABLES",
   SHOW_TOAST = "SHOW_TOAST",
   CREATE_VARIABLE = "CREATE_VARIABLE",
   DELETE_VARIABLE = "DELETE_VARIABLE",
@@ -58,14 +59,15 @@ export function GetLocalStateValue<T>(key: LOCAL_STORAGE_KEYS, value: T) {
 
 type PickedVariable = Pick<Variable, "id" | "name" | "resolvedType">;
 type GetLocalVariablesMessage = {
-  type: MESSAGE_TYPE.GET_LOCAL_VARIABLES;
+  type: MESSAGE_TYPE.GET_LOCAL_VARIABLES | MESSAGE_TYPE.MQTT_GET_LOCAL_VARIABLES;
   payload?: PickedVariable[] | undefined;
 };
 export function GetLocalVariables(
   payload?: PickedVariable[] | undefined,
+  type: MESSAGE_TYPE.GET_LOCAL_VARIABLES | MESSAGE_TYPE.MQTT_GET_LOCAL_VARIABLES = MESSAGE_TYPE.GET_LOCAL_VARIABLES,
 ): GetLocalVariablesMessage {
   return {
-    type: MESSAGE_TYPE.GET_LOCAL_VARIABLES,
+    type,
     payload,
   };
 }

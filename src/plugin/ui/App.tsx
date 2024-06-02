@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import { TRPCReactProvider, api, type RouterOutputs } from "../../trpc/react";
@@ -9,6 +9,8 @@ import {
   FigmaMqttProvider,
   InternalMqttProvider,
   useAuth,
+  useInternalMqtt,
+  useMqtt,
 } from "./providers";
 import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE } from "./types";
 
@@ -39,9 +41,9 @@ export default function App() {
   return (
     <TRPCReactProvider source="figma-ui" accessToken={localTokens?.accessToken}>
       <AuthProvider>
-        <AuthenticatedBackgroundStuff />
         <InternalMqttProvider>
           <FigmaMqttProvider>
+            <BackgroundStuff />
             <RouterProvider router={router} />
           </FigmaMqttProvider>
         </InternalMqttProvider>
@@ -50,18 +52,56 @@ export default function App() {
   );
 }
 
-function AuthenticatedBackgroundStuff() {
+function BackgroundStuff() {
   const { user } = useAuth();
+  useInternalVariableState();
 
-  if (!user) return null;
-  return (
-    <>
-      <SyncVariables />
-    </>
-  );
+  return <>{user && <AuthenticatedBackgroundStuff />}</>;
 }
 
-function SyncVariables() {
+function useInternalVariableState() {
+  const internalVariableState = useRef(
+    new Map<string, VariableValue | undefined>(),
+  );
+  const { publish: publishWithMqtt } = useMqtt();
+  const { publish: publishWithInternalMqtt } = useInternalMqtt();
+  const { createTopic } = useUid();
+
+  const handler = useCallback(
+    async (variables: Variable[] | undefined) => {
+      variables?.forEach((variable) => {
+        const newValue = Object.values(variable.valuesByMode)[0];
+        const topic = createTopic(variable.id, "get") ?? variable.id;
+
+        const currentValue = internalVariableState.current.get(topic);
+        const newValueAsJSON = JSON.stringify(newValue);
+        internalVariableState.current.set(topic, newValueAsJSON);
+
+        if (newValueAsJSON !== currentValue) {
+          console.log({ newValue, currentValue });
+          void publishWithMqtt(topic, newValueAsJSON);
+          void publishWithInternalMqtt(topic, newValueAsJSON);
+        }
+      });
+    },
+    [createTopic, publishWithInternalMqtt, publishWithMqtt],
+  );
+
+  useMessageListener<Variable[] | undefined>(
+    MESSAGE_TYPE.MQTT_GET_LOCAL_VARIABLES,
+    handler,
+    { intervalInMs: 100 },
+  );
+
+  return null;
+}
+
+function AuthenticatedBackgroundStuff() {
+  useSyncVariablesWithDatabase();
+  return null;
+}
+
+function useSyncVariablesWithDatabase() {
   const { mutateAsync } = api.figma.sync.useMutation();
   const { uid } = useUid();
 
@@ -80,5 +120,6 @@ function SyncVariables() {
     handler,
     { intervalInMs: 10000, shouldSendInitialMessage: true },
   );
+
   return null;
 }

@@ -29,8 +29,9 @@ figma.ui.onmessage = <T>(message: Message<T>) => {
       void getLocalValue(payload.key, payload.value);
       break;
     }
+    case MESSAGE_TYPE.MQTT_GET_LOCAL_VARIABLES:
     case MESSAGE_TYPE.GET_LOCAL_VARIABLES: {
-      void getLocalVariables();
+      void getLocalVariables(type);
       break;
     }
     case MESSAGE_TYPE.CREATE_VARIABLE: {

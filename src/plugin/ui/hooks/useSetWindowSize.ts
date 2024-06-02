@@ -7,7 +7,6 @@ export function useSetWindowSize(
   options: Pick<ShowUIOptions, "height" | "width">,
 ) {
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sendMessageToFigma(SetUiOptions(options));
   }, [options]);
 }

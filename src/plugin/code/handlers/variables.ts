@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 import { FIGMA_HARDWARE_CONNECT_COLLECTION_NAME } from "../constants";
-import { CreateVariable, DeleteVariable, GetLocalVariables } from "../types";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { CreateVariable, DeleteVariable, GetLocalVariables, type MESSAGE_TYPE } from "../types";
 
 export async function deleteVariable(id: string) {
   const variable = await figma.variables.getVariableByIdAsync(id);
@@ -21,7 +23,7 @@ export async function createVariable(
   figma.ui.postMessage(CreateVariable({ name, resolvedType }));
 }
 
-export async function getLocalVariables() {
+export async function getLocalVariables(type: MESSAGE_TYPE.GET_LOCAL_VARIABLES | MESSAGE_TYPE.MQTT_GET_LOCAL_VARIABLES) {
   const collection = await getCollection();
 
   const promises = collection.variableIds.map((id) =>
@@ -34,9 +36,10 @@ export async function getLocalVariables() {
       name: variable.name,
       description: variable.description,
       resolvedType: variable.resolvedType,
+      valuesByMode: variable.valuesByMode,
     };
   });
-  figma.ui.postMessage(GetLocalVariables(variablesToSend));
+  figma.ui.postMessage(GetLocalVariables(variablesToSend, type));
 }
 
 export async function setLocalvariable(id: string, value: unknown) {
@@ -69,10 +72,20 @@ function unknownToBooleanOrNull(value: unknown): boolean | null {
 }
 
 function unknownToFloatOrNull(value: unknown): number | null {
-  const float = parseFloat(value as string);
-  if (isNaN(float)) return null;
+  const valueAsString = unknownToStringOrNull(value);
 
-  const number = parseInt(value as string);
+  if (valueAsString === null) return null
+  const formattedString = valueAsString.replace(',', ".");
+  const float = parseFloat(formattedString);
+  if (isNaN(float)) {
+    const booleanValue = unknownToBooleanOrNull(formattedString);
+    if (booleanValue !== null) {
+      return Number(booleanValue);
+    }
+    return null;
+  }
+
+  const number = parseInt(formattedString);
   if (isNaN(number)) return null;
 
   return float > number ? float : number;

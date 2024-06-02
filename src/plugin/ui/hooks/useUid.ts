@@ -8,12 +8,12 @@ export function useUid() {
     initialValue: generateUid(),
   });
 
-  function createTopic(id: string) {
+  function createTopic(id: string, type: 'get' | 'set' = 'set') {
     if (!uid) {
       return;
     }
 
-    return `fhc/${uid}/${id}`;
+    return `fhc/${uid}/${id}/${type}`;
   }
 
   function generateUid() {

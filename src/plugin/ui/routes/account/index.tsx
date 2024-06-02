@@ -1,4 +1,3 @@
-/** eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { Header, Text } from "../../components";
 import { useSetWindowSize } from "../../hooks";

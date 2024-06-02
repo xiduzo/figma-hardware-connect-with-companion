@@ -32,6 +32,7 @@ export function useMqttClient() {
   }
 
   async function publish(topic: string, payload: string) {
+    console.log("Publishing to", topic, payload);
     return client.current?.publishAsync(topic, payload);
   }
 

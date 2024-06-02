@@ -12,7 +12,7 @@ export function FormSelect({ name, label, ...inputProps }: Props) {
   return (
     <Label className="flex flex-col space-y-0.5">
       <Text dimmed>{label ?? name}</Text>
-      {error && <Text isError>{error}</Text>}
+      {error && <Text intent={error ? "danger" : "none"}>{error}</Text>}
       <Controller
         name={name}
         control={control}

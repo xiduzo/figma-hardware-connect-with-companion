@@ -45,7 +45,6 @@ export function useLocalStorage<T>(
   );
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sendMessageToFigma(GetLocalStateValue(key, options?.initialValue));
   }, [key, options?.initialValue]);
 

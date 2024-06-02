@@ -1,9 +1,6 @@
-/** eslint-disable @typescript-eslint/no-unsafe-call */
-/** eslint-disable @typescript-eslint/no-unsafe-return */
-/** eslint-disable @typescript-eslint/no-unsafe-member-access */
-/** eslint-disable @typescript-eslint/no-unsafe-argument */
 import React, { useEffect } from "react";
 
+import { type Packet } from "mqtt";
 import { createContext, useContext, type PropsWithChildren } from "react";
 import { z } from "zod";
 import { useMqttClient, useUid } from "../hooks";
@@ -32,6 +29,11 @@ const FigmaMqttContext = createContext({
   disconnect: (): void => {
     throw new Error("MqttProvider not found");
   },
+  publish: (topic: string, payload: string): Promise<Packet | undefined> => {
+    throw new Error("MqttProvider not found", {
+      cause: JSON.stringify({ topic, payload }),
+    });
+  },
 });
 
 export function FigmaMqttProvider({ children }: PropsWithChildren) {
@@ -48,11 +50,11 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
     subscribe,
     unsubscribe,
     subscriptions,
+    publish,
   } = useMqttClient();
 
   function handleDisconnect() {
     void setMqttConnection(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       (prev) => prev && { ...prev, autoConnect: false },
     ).then(disconnect);
   }
@@ -77,7 +79,6 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
       const topic = createTopic(variable.id);
       if (!topic) return;
       subscribe(topic, (_: string, payload: Buffer) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         sendMessageToFigma(SetLocalValiable(variable.id, payload.toString()));
       });
     }
@@ -98,10 +99,8 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
   }, [isConnected, getLocalVariables]);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!mqttConnection?.autoConnect) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     void connect(mqttConnection);
   }, [mqttConnection, connect]);
 
@@ -111,6 +110,7 @@ export function FigmaMqttProvider({ children }: PropsWithChildren) {
         connect: handleConnect,
         disconnect: handleDisconnect,
         isConnected,
+        publish,
       }}
     >
       {children}

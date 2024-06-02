@@ -13,7 +13,7 @@ export function FormInput({ name, label, ...inputProps }: Props) {
   return (
     <Label className="flex flex-col">
       <Text dimmed>{label ?? name}</Text>
-      {error && <Text isError>{error}</Text>}
+      {error && <Text intent={error ? "danger" : "none"}>{error}</Text>}
       <Controller
         name={name}
         control={control}

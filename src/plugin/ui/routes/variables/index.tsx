@@ -76,8 +76,9 @@ export default function Page() {
           </section>
         )}
         {variables?.map((variable) => {
-          const topic = createTopic(variable.id);
-          if (!topic) return null;
+          const setTopic = createTopic(variable.id);
+          const getTopic = createTopic(variable.id, "get");
+          if (!setTopic || !getTopic) return null;
           return (
             <section
               key={variable.id}
@@ -86,12 +87,20 @@ export default function Page() {
               <section className="flex flex-col">
                 <div className="flex items-center space-x-2">
                   <TypeIcon resolvedType={variable.resolvedType} />
-                  <Text>{variable.name}</Text>
+                  <Title as="h2" className="text-lg">
+                    {variable.name}
+                  </Title>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Text dimmed> {topic}</Text>
-                  <CopyIconButton text={topic} />
-                </div>
+                <ButtonGroup>
+                  <CopyIconButton
+                    textToCopy={setTopic}
+                    text="copy set variable topic"
+                  />
+                  <CopyIconButton
+                    textToCopy={getTopic}
+                    text="copy get variable topic"
+                  />
+                </ButtonGroup>
               </section>
               <ButtonGroup>
                 <IconButton

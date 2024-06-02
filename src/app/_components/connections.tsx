@@ -12,7 +12,8 @@ export function ShowConections() {
   return (
     <section>
       {data?.map((variable) => {
-        const topic = `fhc/${variable.uid}/${variable.id}`;
+        const setTopic = `fhc/${variable.uid}/${variable.id}/set`;
+        const getTopic = `fhc/${variable.uid}/${variable.id}/get`;
         return (
           <section key={variable.id} className="flex justify-between py-2">
             <section className="flex flex-col">
@@ -21,8 +22,12 @@ export function ShowConections() {
                 <Text>{variable.name}</Text>
               </div>
               <div className="flex items-center space-x-2">
-                <Text dimmed>{topic}</Text>
-                <CopyIconButton text={topic} />
+                <Text dimmed>{setTopic}</Text>
+                <CopyIconButton text={setTopic} />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Text dimmed>{getTopic}</Text>
+                <CopyIconButton text={getTopic} />
               </div>
             </section>
             <ButtonGroup></ButtonGroup>

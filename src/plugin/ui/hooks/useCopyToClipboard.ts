@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { useEffect, useState } from "react";
 import { ShowToast } from "../types";
 import { sendMessageToFigma } from "../utils";
@@ -37,7 +36,6 @@ export function useCopyToClipboard() {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     sendMessageToFigma(
       ShowToast("Unabled to copy to clipboard", { error: true }),
     );

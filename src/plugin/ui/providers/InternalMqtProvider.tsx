@@ -1,4 +1,4 @@
-/** eslint-disable @typescript-eslint/no-unsafe-call */
+import { type Packet } from "mqtt";
 import React, {
   createContext,
   useContext,
@@ -12,10 +12,15 @@ import { useAuth } from "./AuthProvider";
 
 const InternalMqttContext = createContext({
   isConnected: false,
+  publish: (topic: string, payload: string): Promise<Packet | undefined> => {
+    throw new Error("MqttProvider not found", {
+      cause: JSON.stringify({ topic, payload }),
+    });
+  },
 });
 
 export function InternalMqttProvider({ children }: PropsWithChildren) {
-  const { connect, isConnected, subscribe } = useMqttClient();
+  const { connect, isConnected, subscribe, publish } = useMqttClient();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -34,13 +39,12 @@ export function InternalMqttProvider({ children }: PropsWithChildren) {
         message: message.toString(),
       });
       if (variable && variable.toLowerCase().startsWith("variableid")) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         sendMessageToFigma(SetLocalValiable(variable, message.toString()));
       }
     });
   }, [isConnected, user, subscribe]);
   return (
-    <InternalMqttContext.Provider value={{ isConnected }}>
+    <InternalMqttContext.Provider value={{ isConnected, publish }}>
       {children}
     </InternalMqttContext.Provider>
   );
