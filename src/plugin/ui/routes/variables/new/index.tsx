@@ -16,7 +16,7 @@ export default function Page() {
 
   function handleValid(data: VariableFormData) {
     sendMessageToFigma(CreateVariable(data));
-    navigate("/variables");
+    navigate(-1);
   }
 
   return (

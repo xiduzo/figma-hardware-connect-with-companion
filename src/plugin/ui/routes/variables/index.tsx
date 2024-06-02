@@ -22,7 +22,7 @@ export default function Page() {
   const { createTopic } = useUid();
   const navigate = useNavigate();
   const [variables, setVariables] = useState<Variable[] | undefined>([]);
-  useSetWindowSize({ width: 500, height: 450 });
+  useSetWindowSize({ width: 475, height: 500 });
 
   useMessageListener<Variable[] | undefined>(
     MESSAGE_TYPE.GET_LOCAL_VARIABLES,
