@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-import { FIGMA_HARDWARE_CONNECT_COLLECTION_NAME } from "../constants";
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { FIGMA_PLUGIN_NAME } from "../constants";
 import { CreateVariable, DeleteVariable, GetLocalVariables, type MESSAGE_TYPE } from "../types";
 
 export async function deleteVariable(id: string) {
@@ -159,6 +157,7 @@ function hexToRgba(input: string): RGB | RGBA | null {
     case 3: {
       // #RGB
       const [r, g, b] = hex;
+      if (r === undefined || g === undefined || b === undefined) return null;
       return {
         r: parseInt(r + r, 16),
         g: parseInt(g + g, 16),
@@ -241,11 +240,12 @@ function valueToFigmaValue(
 async function getCollection() {
   const collections = await figma.variables.getLocalVariableCollectionsAsync();
   const collection = collections.find(
-    ({ name }) => name === FIGMA_HARDWARE_CONNECT_COLLECTION_NAME,
+    ({ name }) => name === FIGMA_PLUGIN_NAME,
   );
   if (!collection) {
     return figma.variables.createVariableCollection(
-      FIGMA_HARDWARE_CONNECT_COLLECTION_NAME,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      FIGMA_PLUGIN_NAME,
     );
   }
   return collection;

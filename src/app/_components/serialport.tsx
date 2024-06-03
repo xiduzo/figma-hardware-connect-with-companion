@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "~/common/components";
+import { TOPIC_PREFIX } from "~/common/constants";
 import { useMqttClient } from "~/common/hooks";
 
 // TODO
@@ -56,7 +57,10 @@ export function SerialPortComponent({ userId }: { userId: string }) {
                     // send to MQTT here
                     if (value) {
                       console.log({ fullVariableId, value });
-                      await publish(`fhc/${userId}/${fullVariableId}`, value);
+                      await publish(
+                        `${TOPIC_PREFIX}/${userId}/${fullVariableId}`,
+                        value,
+                      );
                       await new Promise((resolve) => setTimeout(resolve, 200)); // throttle a little bit
                     }
                     strToParse = "";

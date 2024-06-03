@@ -43,7 +43,6 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
             email: true,
             image: true,
             name: true,
-            uid: true,
           },
         },
       },

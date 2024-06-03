@@ -13,7 +13,7 @@ import {
 } from "../../components";
 
 import { useNavigate } from "react-router-dom";
-import { FIGMA_HARDWARE_CONNECT_COLLECTION_NAME } from "../../constants";
+import { FIGMA_PLUGIN_NAME } from "../../constants";
 import { useMessageListener, useSetWindowSize, useUid } from "../../hooks";
 import { DeleteVariable, GetLocalVariables, MESSAGE_TYPE } from "../../types";
 import { sendMessageToFigma } from "../../utils";
@@ -62,8 +62,7 @@ export default function Page() {
             />
             <Title as="h2">No variables found</Title>
             <Text dimmed className="mt-4 max-w-sm">
-              All variables in the{" "}
-              <Code>{FIGMA_HARDWARE_CONNECT_COLLECTION_NAME}</Code> collection
+              All variables in the <Code>{FIGMA_PLUGIN_NAME}</Code> collection
               will automatically synchronize with this plugin.
             </Text>
             <Button

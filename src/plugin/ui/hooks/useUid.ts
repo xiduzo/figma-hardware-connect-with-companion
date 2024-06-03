@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { TOPIC_PREFIX } from "../constants";
 import { useLocalStorage } from "../hooks";
 import { LOCAL_STORAGE_KEYS } from "../types";
 import { cuid } from "../utils/cuid";
@@ -13,7 +13,7 @@ export function useUid() {
       return;
     }
 
-    return `fhc/${uid}/${id}/${type}`;
+    return `${TOPIC_PREFIX}/${uid}/${id}/${type}`;
   }
 
   function generateUid() {

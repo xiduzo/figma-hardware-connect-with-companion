@@ -10,6 +10,7 @@ import {
   Text,
   Title,
 } from "../components";
+import { VERCEL_URL } from "../constants";
 import { useSetWindowSize } from "../hooks/useSetWindowSize";
 import { useAuth, useInternalMqtt, useMqtt } from "../providers";
 
@@ -65,7 +66,7 @@ function SerialSection() {
   const navigate = useNavigate();
 
   function gotoCompanionApp() {
-    window.open("http://localhost:3000", "_blank");
+    window.open(VERCEL_URL, "_blank");
   }
 
   return (

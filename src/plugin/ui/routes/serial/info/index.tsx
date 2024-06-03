@@ -1,5 +1,6 @@
 import React from "react";
 import { Header, Text } from "../../../components";
+import { VERCEL_URL } from "../../../constants";
 import { useSetWindowSize } from "../../../hooks";
 import { AuthButton } from "../../../providers";
 
@@ -7,8 +8,9 @@ export default function Page() {
   useSetWindowSize({ width: 250, height: 320 });
 
   function gotoCompanionApp() {
-    window.open("http://localhost:3000", "_blank");
+    window.open(VERCEL_URL, "_blank");
   }
+
   return (
     <>
       <Header title="Serial"></Header>

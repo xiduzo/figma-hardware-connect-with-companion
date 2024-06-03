@@ -33,7 +33,7 @@ export default function Page() {
       await connect(data);
       navigate(-1);
     } finally {
-      setLocalState(data.autoConnect ? data : undefined);
+      void setLocalState(data.autoConnect ? data : undefined);
     }
   };
 

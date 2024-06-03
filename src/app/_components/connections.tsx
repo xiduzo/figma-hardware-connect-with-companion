@@ -1,6 +1,7 @@
 "use client";
 
 import { ButtonGroup, Text, TypeIcon } from "~/common/components";
+import { TOPIC_PREFIX } from "~/common/constants";
 import { api } from "~/trpc/react";
 import { CopyIconButton } from "./CopyIconButton";
 
@@ -12,8 +13,8 @@ export function ShowConections() {
   return (
     <section>
       {data?.map((variable) => {
-        const setTopic = `fhc/${variable.uid}/${variable.id}/set`;
-        const getTopic = `fhc/${variable.uid}/${variable.id}/get`;
+        const setTopic = `${TOPIC_PREFIX}/${variable.uid}/${variable.id}/set`;
+        const getTopic = `${TOPIC_PREFIX}/${variable.uid}/${variable.id}/get`;
         return (
           <section key={variable.id} className="flex justify-between py-2">
             <section className="flex flex-col">
@@ -23,11 +24,11 @@ export function ShowConections() {
               </div>
               <div className="flex items-center space-x-2">
                 <Text dimmed>{setTopic}</Text>
-                <CopyIconButton text={setTopic} />
+                <CopyIconButton textToCopy={setTopic} />
               </div>
               <div className="flex items-center space-x-2">
                 <Text dimmed>{getTopic}</Text>
-                <CopyIconButton text={getTopic} />
+                <CopyIconButton textToCopy={getTopic} />
               </div>
             </section>
             <ButtonGroup></ButtonGroup>

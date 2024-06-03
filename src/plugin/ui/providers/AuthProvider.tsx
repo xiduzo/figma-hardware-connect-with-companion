@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, type PropsWithChildren } from "react";
 import { type RouterOutputs } from "../../../trpc/react";
 import { Button } from "../components";
+import { VERCEL_URL } from "../constants";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { trpc } from "../trpc";
 import { LOCAL_STORAGE_KEYS } from "../types";
@@ -68,7 +69,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!readWriteKeys?.write) return;
 
     window.open(
-      `http://localhost:3000/api/auth/signin?figma-write-key=${readWriteKeys.write}`,
+      `${VERCEL_URL}/api/auth/signin?figma-write-key=${readWriteKeys.write}`,
       "_blank",
     );
 
