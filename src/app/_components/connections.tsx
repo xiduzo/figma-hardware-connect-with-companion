@@ -11,7 +11,7 @@ export function ShowConections() {
   });
 
   return (
-    <section>
+    <>
       {data?.map((variable) => {
         const setTopic = `${TOPIC_PREFIX}/${variable.uid}/${variable.id}/set`;
         const getTopic = `${TOPIC_PREFIX}/${variable.uid}/${variable.id}/get`;
@@ -35,6 +35,6 @@ export function ShowConections() {
           </section>
         );
       })}
-    </section>
+    </>
   );
 }

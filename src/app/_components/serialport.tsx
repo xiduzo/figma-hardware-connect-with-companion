@@ -10,7 +10,7 @@ import { useMqttClient } from "~/common/hooks";
 // https://github.com/noopkat/avrgirl-arduino
 // https://github.com/monteslu/j5-chrome/blob/29e916c96fa09268dd14faa3de5186b025f6e062/ui.js#L12
 // https://github.com/blokdots
-export function SerialPortComponent({ userId }: { userId: string }) {
+export function SerialPortComponent({ userId }: { userId?: string }) {
   const [port, setPort] = useState<SerialPort | null>(null);
 
   const { connect, publish } = useMqttClient();

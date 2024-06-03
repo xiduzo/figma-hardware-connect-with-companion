@@ -1,43 +1,31 @@
-import Link from "next/link";
-
+import { Icon, Text, Title } from "~/common/components";
 import { getServerAuthSession } from "~/server/auth";
+import { Navigation } from "./_components/Navigation";
 import { ShowConections } from "./_components/connections";
 import { SerialPortComponent } from "./_components/serialport";
-// import { api } from "~/trpc/server";
 
 export default async function Home() {
   const session = await getServerAuthSession();
 
   return (
-    <main className="flex h-screen w-screen flex-col items-center justify-center space-y-4 bg-stone-100 p-4 dark:bg-stone-800">
-      <Link
-        href={session ? "/api/auth/signout" : "/api/auth/signin"}
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-      >
-        {session ? "Sign out" : "Sign in"}
-      </Link>
+    <>
+      <Navigation />
 
-      {session && <ShowConections />}
-      {session && <SerialPortComponent userId={session.user.id} />}
-    </main>
+      <section className="flex space-x-4">
+        <main className="flex-grow">
+          <div className="mb-4 flex items-center space-x-2">
+            <Icon icon="ExclamationTriangleIcon" />
+            <Text>This is under active development</Text>
+          </div>
+          <SerialPortComponent userId={session?.user.id} />
+        </main>
+
+        <aside className="w-2/5">
+          <Title>Figma variables</Title>
+          {session && <ShowConections />}
+          {!session && <Text>Sign in to sync</Text>}
+        </aside>
+      </section>
+    </>
   );
 }
-
-// async function CrudShowcase() {
-//   const session = await getServerAuthSession();
-//   if (!session?.user) return null;
-
-//   const latestPost = await api.post.getLatest();
-
-//   return (
-//     <div className="w-full max-w-xs">
-//       {latestPost ? (
-//         <p className="truncate">Your most recent post: {latestPost.name}</p>
-//       ) : (
-//         <p>You have no posts yet.</p>
-//       )}
-
-//       <CreatePost />
-//     </div>
-//   );
-// }
