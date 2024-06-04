@@ -2,9 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  httpBatchLink,
-  loggerLink,
-  unstable_httpBatchStreamLink,
+    httpBatchLink,
+    loggerLink,
+    unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
@@ -100,6 +100,8 @@ export function TRPCReactProvider(props: {
 }
 
 function getBaseUrl() {
+  return "https://figma-hardware-bridge.vercel.app"
+
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
 
   return `http://localhost:${process.env.PORT ?? 3000}`;
