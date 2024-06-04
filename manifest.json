@@ -8,7 +8,7 @@
   "ui": "build/plugin/index.html",
   "networkAccess": {
     "allowedDomains": ["*"],
-    "reasoning": "This plugin needs to connect to an MQTT broker of your choice to send and receive messages."
+    "reasoning": "This plugin could connect to any MQTT broker of your liking to send and receive messages."
   },
   "documentAccess": "dynamic-page"
 }

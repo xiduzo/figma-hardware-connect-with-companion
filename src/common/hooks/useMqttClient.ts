@@ -14,15 +14,12 @@ export function useMqttClient() {
   }, [])
 
   const unsubscribe = useCallback((topic: string) => {
-    console.log("Unsubscribing from", topic);
     subscriptions.current.delete(topic);
     return client.current?.unsubscribeAsync(topic);
   }, [])
 
   const subscribe = useCallback((topic: string, callback: mqtt.OnMessageCallback) => {
     if (subscriptions.current.get(topic)) return;
-
-    console.log("Subscribing to", topic);
     subscriptions.current.set(topic, callback);
     client.current?.subscribeAsync(topic).catch(console.error);
 
@@ -32,7 +29,6 @@ export function useMqttClient() {
   }, [unsubscribe])
 
   const publish = useCallback(async (topic: string, payload: string) => {
-    console.log("Publishing to", topic, payload);
     return client.current?.publishAsync(topic, payload);
   }, [])
 

@@ -78,7 +78,6 @@ function useInternalVariableState() {
         internalVariableState.current.set(topic, newValueAsJSON);
 
         if (newValueAsJSON !== currentValue) {
-          console.log({ newValue, currentValue });
           void publishWithMqtt(topic, newValueAsJSON);
           void publishWithInternalMqtt(topic, newValueAsJSON);
         }

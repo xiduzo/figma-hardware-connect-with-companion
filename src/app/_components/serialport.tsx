@@ -57,7 +57,6 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
   }, [connect]);
 
   useEffect(() => {
-    console.log("disconnecting from hook");
     return () => {
       void disconnectWebSerial();
     };

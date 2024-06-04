@@ -35,7 +35,6 @@ figma.ui.onmessage = <T>(message: Message<T>) => {
       break;
     }
     case MESSAGE_TYPE.CREATE_VARIABLE: {
-      console.log("create variable", payload);
       void createVariable(payload.name, payload.resolvedType);
       break;
     }
