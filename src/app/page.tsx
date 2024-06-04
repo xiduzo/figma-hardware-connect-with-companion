@@ -1,7 +1,7 @@
-import { Icon, Text, Title } from "~/common/components";
+import { Icon, Text } from "~/common/components";
 import { getServerAuthSession } from "~/server/auth";
+import { FigmaVariables } from "./_components/FigmaVariables";
 import { Navigation } from "./_components/Navigation";
-import { ShowConections } from "./_components/connections";
 import { SerialPortComponent } from "./_components/serialport";
 
 export default async function Home() {
@@ -11,8 +11,8 @@ export default async function Home() {
     <>
       <Navigation />
 
-      <section className="flex space-x-4">
-        <main className="flex-grow">
+      <section className="flex flex-grow space-x-4">
+        <main className="flex w-3/5 flex-col">
           <div className="mb-4 flex items-center space-x-2">
             <Icon icon="ExclamationTriangleIcon" />
             <Text>This is under active development</Text>
@@ -21,9 +21,8 @@ export default async function Home() {
         </main>
 
         <aside className="w-2/5">
-          <Title>Figma variables</Title>
-          {session && <ShowConections />}
-          {!session && <Text>Sign in to sync</Text>}
+          {session && <FigmaVariables />}
+          {!session && <Text>Sign in to sync with figma</Text>}
         </aside>
       </section>
     </>
