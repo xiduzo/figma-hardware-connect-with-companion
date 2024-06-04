@@ -29,24 +29,19 @@ export function InternalMqttProvider({ children }: PropsWithChildren) {
   }, [connect]);
 
   useEffect(() => {
-    if (!isConnected) return;
     if (!user) return;
 
     return subscribe(
-      `${TOPIC_PREFIX}/${user.id}/#`,
+      `${TOPIC_PREFIX}/${user.id}/+/set`,
       (topic: string, message: Buffer) => {
-        const topicParts = topic.split("/");
-        const variable = topicParts.at(-1);
-        console.log("Received message", {
-          variable,
-          message: message.toString(),
-        });
-        if (variable && variable.toLowerCase().startsWith("variableid")) {
-          sendMessageToFigma(SetLocalValiable(variable, message.toString()));
-        }
+        const match = topic.match(/VariableID:\d+:\d+/);
+        if (!match) return;
+
+        const [variable] = match;
+        sendMessageToFigma(SetLocalValiable(variable, message.toString()));
       },
     );
-  }, [isConnected, user, subscribe]);
+  }, [user, subscribe]);
   return (
     <InternalMqttContext.Provider value={{ isConnected, publish }}>
       {children}

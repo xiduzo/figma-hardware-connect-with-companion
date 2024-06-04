@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Button } from "~/common/components";
+import { useEffect, useRef, useState } from "react";
+import { Button, Text } from "~/common/components";
 import { TOPIC_PREFIX } from "~/common/constants";
 import { useMqttClient } from "~/common/hooks";
 
@@ -12,6 +12,7 @@ import { useMqttClient } from "~/common/hooks";
 // https://github.com/blokdots
 export function SerialPortComponent({ userId }: { userId?: string }) {
   const [port, setPort] = useState<SerialPort | null>(null);
+  const readerRef = useRef<ReadableStreamDefaultReader>();
 
   const { connect, publish } = useMqttClient();
 
@@ -30,6 +31,7 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
 
         while (port.readable) {
           const reader = port.readable.getReader();
+          readerRef.current = reader;
           let strToParse = "";
 
           try {
@@ -45,24 +47,14 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
                 const decoded = new TextDecoder().decode(value);
                 strToParse += decoded;
                 if (decoded.indexOf("\r\n")) {
-                  // regex VariableID:1838:151=<anything>
-                  const regex = /VariableID:(\d+):(\d+)=(.{1,})/;
+                  // regex VariableID:1838:151/set<VALUE>
+                  const regex = /(VariableID:\d+:\d+)(\/set)(.{1,})/;
                   const match = strToParse.match(regex);
                   if (match) {
-                    const [, collection, id, value] = match;
-                    const fullVariableId = `VariableID:${collection}:${id}`;
-                    // dont mutate anything on the server,
-                    // just use mqtt to send the values to the server
-                    //
-                    // send to MQTT here
-                    if (value) {
-                      console.log({ fullVariableId, value });
-                      await publish(
-                        `${TOPIC_PREFIX}/${userId}/${fullVariableId}`,
-                        value,
-                      );
-                      await new Promise((resolve) => setTimeout(resolve, 200)); // throttle a little bit
-                    }
+                    const [, variableId, , value] = match;
+                    const topic = `${TOPIC_PREFIX}/${userId}/${variableId}/set`;
+                    await publish(topic, value ?? "");
+                    await new Promise((resolve) => setTimeout(resolve, 10)); // little throttle
                     strToParse = "";
                   }
                 }
@@ -84,5 +76,21 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
     };
   }, [port]);
 
-  return <Button onClick={requestSerialPorts}>Request Serial Port</Button>;
+  return (
+    <section>
+      <Button onClick={requestSerialPorts}>Request Serial Port</Button>
+      {port && <Text>{JSON.stringify(port.getInfo())}</Text>}
+      {port && (
+        <Button
+          onClick={() => {
+            readerRef.current?.releaseLock();
+            void port.close();
+            setPort(null);
+          }}
+        >
+          close port
+        </Button>
+      )}
+    </section>
+  );
 }
