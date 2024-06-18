@@ -29,6 +29,7 @@ export function useMqttClient() {
   }, [unsubscribe])
 
   const publish = useCallback(async (topic: string, payload: string) => {
+    console.log("publish", { topic, payload });
     return client.current?.publishAsync(topic, payload);
   }, [])
 

@@ -11,7 +11,7 @@ export function FormInput({ name, label, ...inputProps }: Props) {
   const error = useFormFieldError(name);
 
   return (
-    <Label className="flex flex-col">
+    <Label>
       <Text dimmed>{label ?? name}</Text>
       {error && <Text intent={error ? "danger" : "none"}>{error}</Text>}
       <Controller

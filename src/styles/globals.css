@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+code {
+  @apply rounded-lg bg-gray-900 px-2 py-1.5;
+}
+
+pre > code {
+  @apply bg-inherit;
+}

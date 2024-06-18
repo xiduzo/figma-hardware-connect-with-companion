@@ -1,9 +1,10 @@
 "use client";
 import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
-import { Button, ButtonGroup, Icon, Text } from "~/common/components";
+import { Button, ButtonGroup, Icon, Select, Text } from "~/common/components";
 import { TOPIC_PREFIX } from "~/common/constants";
 import { useMqttClient } from "~/common/hooks";
+import { api } from "~/trpc/react";
 import { useWebSerial } from "../_hooks/useWebSerial";
 
 // TODO
@@ -20,8 +21,12 @@ type Log = {
 const LOG_CUTOFF = 25;
 export function SerialPortComponent({ userId }: { userId?: string }) {
   const [logs, setLogs] = useState<Log[]>([]);
+  const [baud, setBaud] = useState(9600);
+  const { data } = api.figma.get.useQuery(undefined, {
+    refetchInterval: 10000,
+  });
 
-  const { connect, publish } = useMqttClient();
+  const { connect, publish, subscribe } = useMqttClient();
 
   const handleData = useCallback(
     async (data: string) => {
@@ -49,8 +54,11 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
     [publish, userId],
   );
 
-  const { connect: connectToSerial, disconnect: disconnectWebSerial } =
-    useWebSerial(handleData);
+  const {
+    connect: connectToSerial,
+    disconnect: disconnectWebSerial,
+    isConnected: isSerialConnected,
+  } = useWebSerial(handleData);
 
   useEffect(() => {
     return connect();
@@ -62,13 +70,43 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
     };
   }, [disconnectWebSerial]);
 
+  useEffect(() => {
+    data?.forEach((variable) => {
+      subscribe(
+        `${TOPIC_PREFIX}/${variable.uid}/${variable.id}/get`,
+        (topic, message) => {
+          console.log("Received message", {
+            topic,
+            message: message.toString(),
+          });
+        },
+      );
+    });
+  }, [subscribe, data]);
+
   return (
     <section className="flex flex-col">
       <ButtonGroup className="mb-4">
-        <Button onClick={() => connectToSerial(9600)}>
-          Request Serial Port
-        </Button>
-        <Button onClick={disconnectWebSerial}>close port</Button>
+        <Select
+          value={baud}
+          disabled={isSerialConnected}
+          onChange={({ target }) => setBaud(Number(target.value))}
+        >
+          {[
+            300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 74880, 115200,
+            230400, 250000, 500000, 1000000, 2000000,
+          ].map((value) => (
+            <option value={value} key={value}>
+              {value} baud
+            </option>
+          ))}
+        </Select>
+        {!isSerialConnected && (
+          <Button onClick={() => connectToSerial(baud)}>Connect serial</Button>
+        )}
+        {isSerialConnected && (
+          <Button onClick={disconnectWebSerial}>Disconnect serial</Button>
+        )}
       </ButtonGroup>
       <section className="flex-grow rounded-xl bg-gray-900 p-2 shadow-md">
         <ol className="space-y-1 divide-y divide-gray-800">
@@ -93,7 +131,7 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
                   ))}
               </Text>
               <Text dimmed>-</Text>
-              <Text>{log.message}</Text>
+              <Text className="flex-grow">{log.message}</Text>
               {log.published && <Icon icon="SignalIcon" dimmed intent="info" />}
             </li>
           ))}

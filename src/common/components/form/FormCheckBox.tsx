@@ -11,7 +11,7 @@ export function FormCheckBox({ name, label, ...checkBoxProps }: Props) {
   const error = useFormFieldError(name);
 
   return (
-    <Label className="flex flex-row items-start space-x-2">
+    <Label layout="row">
       <Controller
         name={name}
         control={control}

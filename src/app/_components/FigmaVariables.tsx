@@ -31,7 +31,7 @@ export function FigmaVariables() {
                   {variable.name}
                 </Title>
               </div>
-              <ButtonGroup>
+              <ButtonGroup layout="col">
                 <CopyIconButton
                   textToCopy={setTopic}
                   text="Copy set variable topic"

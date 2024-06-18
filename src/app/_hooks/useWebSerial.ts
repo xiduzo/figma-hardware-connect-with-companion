@@ -1,8 +1,10 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 
 // Heavily inspired by https://web.dev/serial/ and
 // https://github.com/PabloMarozzi/Web-Serial-Monitor/blob/master/index.js
 export function useWebSerial(onData: (data: string) => void | Promise<void>) {
+  const [isConnected, setIsConnected] = useState(false)
   const port = useRef<SerialPort | null>(null);
   const reader = useRef<ReadableStreamDefaultReader<string> | null>(null);
   const inputStream = useRef<ReadableStream | null>(null);
@@ -41,10 +43,13 @@ export function useWebSerial(onData: (data: string) => void | Promise<void>) {
 
     await port.current.close().catch(console.error)
     port.current = null
+    setIsConnected(false)
   }, [])
 
   const connect = useCallback(async (baudRate: number) => {
-    const newPort = await navigator.serial.requestPort().catch(console.error)
+    const newPort = await navigator.serial.requestPort().catch((error: unknown) => {
+      console.warn("failed to request port", { error })
+    })
     if (!newPort) return
 
     port.current = newPort
@@ -64,8 +69,10 @@ export function useWebSerial(onData: (data: string) => void | Promise<void>) {
       outputStream.current = encoder.writable
 
       void readLoop()
+      setIsConnected(true)
     } catch (error) {
-      console.error(error)
+      console.warn("Unable to open open", { error })
+      toast.warn(`Unable to open port at ${baudRate} baud`)
     }
 
     return () => disconnect()
@@ -81,7 +88,7 @@ export function useWebSerial(onData: (data: string) => void | Promise<void>) {
     writer.releaseLock()
   }, [])
 
-  return { connect, send, disconnect }
+  return { connect, send, disconnect, isConnected }
 }
 
 class LineBreakTransformer {

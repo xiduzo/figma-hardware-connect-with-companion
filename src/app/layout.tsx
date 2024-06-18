@@ -1,6 +1,9 @@
+import "react-toastify/dist/ReactToastify.css";
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
+
+import { ToastContainer } from "react-toastify";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -19,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className="flex h-screen w-screen flex-col bg-stone-100 p-4 dark:bg-stone-800">
         <TRPCReactProvider source="next-js">{children}</TRPCReactProvider>
+        <ToastContainer />
       </body>
     </html>
   );

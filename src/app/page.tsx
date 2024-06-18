@@ -12,7 +12,7 @@ export default async function Home() {
       <Navigation />
 
       <section className="flex flex-grow space-x-4">
-        <main className="flex w-3/5 flex-col">
+        <main className="flex w-8/12 flex-col">
           <div className="mb-4 flex items-center space-x-2">
             <Icon icon="ExclamationTriangleIcon" />
             <Text>This is under active development</Text>
@@ -20,7 +20,7 @@ export default async function Home() {
           <SerialPortComponent userId={session?.user.id} />
         </main>
 
-        <aside className="w-2/5">
+        <aside className="w-4/12">
           {session && <FigmaVariables />}
           {!session && <Text>Sign in to sync with figma</Text>}
         </aside>
