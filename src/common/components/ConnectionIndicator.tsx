@@ -3,16 +3,23 @@ import React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { type PropsWithChildren } from "react";
 
-export function ConnectionIndicator({ children, isConnected }: Props) {
+export function ConnectionIndicator({
+  children,
+  isConnected,
+  className,
+}: Props) {
   return (
-    <div className="flex items-center space-x-1">
+    <div className={container({ className })}>
       {children}
       <span className={connetionIndicator({ isConnected })}></span>
     </div>
   );
 }
 
-type Props = PropsWithChildren & VariantProps<typeof connetionIndicator>;
+type Props = PropsWithChildren &
+  VariantProps<typeof connetionIndicator> & { className?: string };
+
+const container = cva("flex items-center space-x-1");
 
 const connetionIndicator = cva("w-2 h-2 rounded-full", {
   variants: {

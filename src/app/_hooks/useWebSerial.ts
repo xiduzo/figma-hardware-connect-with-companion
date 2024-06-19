@@ -28,27 +28,33 @@ export function useWebSerial(onData: (data: string) => void | Promise<void>) {
     if (!port.current) return
 
     if (reader.current) {
-      await reader.current.cancel().catch(console.error)
+      await reader.current.cancel().catch(error => {
+        console.warn("Failed to cancel reader", error)
+      })
       reader.current = null
-      await inputDone.current?.catch(console.error)
+      await inputDone.current?.catch(console.debug)
       inputDone.current = null
     }
 
     if (outputStream.current) {
-      await outputStream.current.getWriter().close().catch(console.error)
+      await outputStream.current.getWriter().close().catch(error => {
+        console.warn("Failed to close output stream", error)
+      })
       outputStream.current = null
-      await outputDone.current?.catch(console.error)
+      await outputDone.current?.catch(console.debug)
       outputDone.current = null
     }
 
-    await port.current.close().catch(console.error)
+    await port.current.close().catch(error => {
+      console.warn("Failed to close port", error)
+    })
     port.current = null
     setIsConnected(false)
   }, [])
 
   const connect = useCallback(async (baudRate: number) => {
-    const newPort = await navigator.serial.requestPort().catch((error: unknown) => {
-      console.warn("failed to request port", { error })
+    const newPort = await navigator.serial.requestPort().catch((error) => {
+      console.warn("failed to request port", error)
     })
     if (!newPort) return
 
@@ -71,21 +77,36 @@ export function useWebSerial(onData: (data: string) => void | Promise<void>) {
       void readLoop()
       setIsConnected(true)
     } catch (error) {
-      console.warn("Unable to open open", { error })
-      toast.warn(`Unable to open port at ${baudRate} baud`)
+      console.warn("Unable to open serial port", { error })
+      if (error instanceof DOMException) {
+        // https://wicg.github.io/serial/#open-method
+        if (error.name === 'NetworkError') {
+          toast.warn(`Unable to open port at ${baudRate} baud. The port might already be in use.`)
+          return
+        }
+      }
+      // toast.warn(`Unable to open port at ${baudRate} baud`)
     }
 
     return () => disconnect()
   }, [disconnect, readLoop])
 
-  const send = useCallback((data: string) => {
-    if (port.current) return
+  const send = useCallback(async (data: string) => {
+    if (!port.current) return false
 
     const writer = outputStream.current?.getWriter()
-    if (!writer) return
+    if (!writer) return false
 
-    writer.write(data).catch(console.error)
-    writer.releaseLock()
+    try {
+      await writer.write(data)
+      console.log("Sent", data)
+      return true
+    } catch (error) {
+      console.warn("Failed to write to port", error)
+      return false
+    } finally {
+      writer.releaseLock()
+    }
   }, [])
 
   return { connect, send, disconnect, isConnected }

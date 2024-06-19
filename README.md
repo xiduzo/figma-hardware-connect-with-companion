@@ -6,8 +6,8 @@ All Serial data is structured as `[TOPIC][VALUE]\n`.
 
 In this plugin we make the distinction between two types of topics:
 
-1. `set variable topic`: This topic is used to send data from Figma to your hardware device.
-1. `get variable topic`: This topic is used to receive data from your hardware device in Figma.
+1. `set variable topic` -- This topic is used to send data from Figma to your hardware device.
+1. `get variable topic` -- This topic is used to receive data from your hardware device in Figma.
 
 ## Sending data
 

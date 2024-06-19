@@ -1,7 +1,14 @@
 "use client";
 import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
-import { Button, ButtonGroup, Icon, Select, Text } from "~/common/components";
+import {
+  Button,
+  ButtonGroup,
+  ConnectionIndicator,
+  Icon,
+  Select,
+  Text,
+} from "~/common/components";
 import { TOPIC_PREFIX } from "~/common/constants";
 import { useMqttClient } from "~/common/hooks";
 import { api } from "~/trpc/react";
@@ -15,10 +22,12 @@ import { useWebSerial } from "../_hooks/useWebSerial";
 // https://github.com/blokdots
 type Log = {
   timestamp: Date;
-  message: string;
+  topic: string;
+  value: string;
   published?: boolean;
+  type: "received" | "sent";
 };
-const LOG_CUTOFF = 25;
+const LOG_CUTOFF = 5;
 export function SerialPortComponent({ userId }: { userId?: string }) {
   const [logs, setLogs] = useState<Log[]>([]);
   const [baud, setBaud] = useState(9600);
@@ -26,7 +35,7 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
     refetchInterval: 10000,
   });
 
-  const { connect, publish, subscribe } = useMqttClient();
+  const { connect, publish, subscribe, isConnected } = useMqttClient();
 
   const handleData = useCallback(
     async (data: string) => {
@@ -34,9 +43,12 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
 
       const regex = /(VariableID:\d+:\d+)(\/set)(.{1,})/;
       const match = data.match(regex);
+      let topic = data;
+      let sendValue = "";
       if (match) {
         const [, variableId, , value] = match;
-        const topic = `${TOPIC_PREFIX}/${userId}/${variableId}/set`;
+        topic = `${TOPIC_PREFIX}/${userId}/${variableId}/set`;
+        sendValue = value ?? "";
         await publish(topic, value ?? "");
       }
 
@@ -45,8 +57,10 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
           ...logs,
           {
             timestamp: new Date(),
-            message: data,
+            topic,
+            value: sendValue,
             published: !!match,
+            type: "sent",
           } satisfies Log,
         ].slice(-LOG_CUTOFF),
       );
@@ -58,6 +72,7 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
     connect: connectToSerial,
     disconnect: disconnectWebSerial,
     isConnected: isSerialConnected,
+    send,
   } = useWebSerial(handleData);
 
   useEffect(() => {
@@ -75,17 +90,32 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
       subscribe(
         `${TOPIC_PREFIX}/${variable.uid}/${variable.id}/get`,
         (topic, message) => {
-          console.log("Received message", {
-            topic,
-            message: message.toString(),
-          });
+          send(topic + message.toString() + "\n")
+            .then((send) => {
+              setLogs((logs) =>
+                [
+                  ...logs,
+                  {
+                    timestamp: new Date(),
+                    topic: topic,
+                    value: message.toString(),
+                    type: "received",
+                    published: !!send,
+                  } satisfies Log,
+                ].slice(-LOG_CUTOFF),
+              );
+            })
+            .catch(console.error);
         },
       );
     });
-  }, [subscribe, data]);
+  }, [subscribe, data, send]);
 
   return (
     <section className="flex flex-col">
+      <ConnectionIndicator isConnected={isConnected} className="mb-4">
+        <Text>Figma plugin connection</Text>
+      </ConnectionIndicator>
       <ButtonGroup className="mb-4">
         <Select
           value={baud}
@@ -108,13 +138,20 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
           <Button onClick={disconnectWebSerial}>Disconnect serial</Button>
         )}
       </ButtonGroup>
-      <section className="flex-grow rounded-xl bg-gray-900 p-2 shadow-md">
+      <section className="flex-grow overflow-scroll rounded-xl bg-gray-900 p-2 shadow-md">
         <ol className="space-y-1 divide-y divide-gray-800">
           {logs.map((log, index) => (
             <li
               key={index}
               className="flex items-center space-x-2 overflow-x-hidden py-0.5"
             >
+              {
+                <Icon
+                  icon={log.type === "sent" ? "ArrowUpIcon" : "ArrowDownIcon"}
+                  dimmed
+                  intent="info"
+                />
+              }
               <Text dimmed className="flex">
                 {`${format(log.timestamp, "HH:mm:ss:SSS")}`
                   .split("")
@@ -131,7 +168,8 @@ export function SerialPortComponent({ userId }: { userId?: string }) {
                   ))}
               </Text>
               <Text dimmed>-</Text>
-              <Text className="flex-grow">{log.message}</Text>
+              <Text className="flex-grow">{log.topic}</Text>
+              <Text>{log.value}</Text>
               {log.published && <Icon icon="SignalIcon" dimmed intent="info" />}
             </li>
           ))}

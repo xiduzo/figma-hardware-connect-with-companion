@@ -38,7 +38,7 @@ const text = cva("", {
 
 type Props = React.HtmlHTMLAttributes<HTMLElement> &
   VariantProps<typeof text> & {
-    as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "span" | "p" | "div";
+    as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "span" | "p" | "div" | "li";
   };
 
 export type { Props as TextProps };
