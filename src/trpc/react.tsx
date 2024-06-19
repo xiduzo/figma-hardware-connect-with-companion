@@ -100,7 +100,7 @@ export function TRPCReactProvider(props: {
 }
 
 function getBaseUrl() {
-  return "https://figma-hardware-bridge.vercel.app"
+  // return "https://figma-hardware-bridge.vercel.app"
 
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
 
