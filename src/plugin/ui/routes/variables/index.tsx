@@ -60,7 +60,7 @@ export default function Page() {
               icon="CubeTransparentIcon"
               className="mb-8 h-24 w-24"
             />
-            <Title as="h2">No variables found</Title>
+            <Text>No variables found</Text>
             <Text dimmed className="mt-4 max-w-sm">
               All variables in the <Code>{FIGMA_PLUGIN_NAME}</Code> collection
               will automatically synchronize with this plugin.
@@ -86,9 +86,7 @@ export default function Page() {
               <section className="flex flex-col">
                 <div className="flex items-center space-x-2">
                   <TypeIcon resolvedType={variable.resolvedType} />
-                  <Title as="h2" className="text-lg">
-                    {variable.name}
-                  </Title>
+                  <Text className="text-lg">{variable.name}</Text>
                 </div>
                 <ButtonGroup>
                   <CopyIconButton

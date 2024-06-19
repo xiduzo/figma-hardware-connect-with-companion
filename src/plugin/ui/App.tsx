@@ -1,3 +1,4 @@
+/** eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useRef } from "react";
 
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
@@ -16,7 +17,6 @@ import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE } from "./types";
 
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
-import { mapValueToFigmaValue } from "../../common/utils/mapValueToFigmaValue";
 import { useMessageListener, useUid } from "./hooks";
 import Home from "./routes";
 import Account from "./routes/account";
@@ -70,26 +70,23 @@ function useInternalVariableState() {
 
   const handler = useCallback(
     async (variables: Variable[] | undefined) => {
-      variables?.forEach((variable) => {
+      if (!variables) return;
+
+      for (const variable of variables) {
         const newValue = Object.values(variable.valuesByMode)[0];
-        const valueAsFigmaValue = mapValueToFigmaValue(
-          variable.resolvedType,
-          newValue,
-        );
+
         const topic = createTopic(variable.id, "get") ?? variable.id;
 
         const currentValue = internalVariableState.current.get(topic);
         const newValueAsJSON =
-          typeof valueAsFigmaValue === "string"
-            ? valueAsFigmaValue
-            : JSON.stringify(valueAsFigmaValue);
+          typeof newValue === "string" ? newValue : JSON.stringify(newValue);
         internalVariableState.current.set(topic, newValueAsJSON);
 
         if (newValueAsJSON !== currentValue) {
           void publishWithMqtt(topic, newValueAsJSON);
           void publishWithInternalMqtt(topic, newValueAsJSON);
         }
-      });
+      }
     },
     [createTopic, publishWithInternalMqtt, publishWithMqtt],
   );

@@ -55,7 +55,7 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
-    "@figma/plugin-typings": "1.93.0",
+    "@figma/plugin-typings": "1.96.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/dom-serial": "^1.0.6",
     "@types/eslint": "8.56.2",
