@@ -16,6 +16,7 @@ import { LOCAL_STORAGE_KEYS, MESSAGE_TYPE } from "./types";
 
 type Tokens = RouterOutputs["auth"]["getAccessToken"];
 
+import { mapValueToFigmaValue } from "../../common/utils/mapValueToFigmaValue";
 import { useMessageListener, useUid } from "./hooks";
 import Home from "./routes";
 import Account from "./routes/account";
@@ -71,10 +72,17 @@ function useInternalVariableState() {
     async (variables: Variable[] | undefined) => {
       variables?.forEach((variable) => {
         const newValue = Object.values(variable.valuesByMode)[0];
+        const valueAsFigmaValue = mapValueToFigmaValue(
+          variable.resolvedType,
+          newValue,
+        );
         const topic = createTopic(variable.id, "get") ?? variable.id;
 
         const currentValue = internalVariableState.current.get(topic);
-        const newValueAsJSON = JSON.stringify(newValue);
+        const newValueAsJSON =
+          typeof valueAsFigmaValue === "string"
+            ? valueAsFigmaValue
+            : JSON.stringify(valueAsFigmaValue);
         internalVariableState.current.set(topic, newValueAsJSON);
 
         if (newValueAsJSON !== currentValue) {
