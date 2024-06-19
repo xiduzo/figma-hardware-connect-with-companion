@@ -38,6 +38,8 @@ void loop() {
 
 To receive data, copy a `get variable topic` from the plugin or the companion app.
 
+⚠️ Receiving data is only possible when updating the variables in your `local variables`. For now, Figma does not support updating variables from a preview or prototype.
+
 ### Examples
 
 #### Arduino

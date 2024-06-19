@@ -65,6 +65,11 @@ export function Content() {
         th: ({ children }) => (
           <th className="border p-2 text-white">{children}</th>
         ),
+        a: ({ children, href }) => (
+          <a href={href} target="_blank" rel="noreferrer" className="underline">
+            {children}
+          </a>
+        ),
         pre: ({ children }) => {
           const { props } = children as {
             props: { children: string; className?: string };
